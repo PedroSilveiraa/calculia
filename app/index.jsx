@@ -1,5 +1,7 @@
+import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Button, Image, StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, Text, View } from "react-native";
+import { BotaoComecar } from "../components/botaoComecar";
 
 const mensagens = [
     "Olá! Eu sou o Calculinho, seu amigo dos números!",
@@ -44,7 +46,7 @@ const [mensagemAtual, setMensagemAtual] = useState("");
         </View>
       
       <Image source={require('../assets/images/calculia/avatar-robo.png')} style={styles.logo}/>
-      <Button title="Click me!" onPress={() => alert("Hello, world!")} />
+      <BotaoComecar title="Quero Iniciar!" onPress={() => router.replace('../components/TelaPrincipal')}/>
     </View>
   );
 }
@@ -66,7 +68,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     alignItems: 'center',
   },
-  
+   // BALÃO DE FALA
   speechBubble: {
     backgroundColor: '#ffffff',
     padding: 16,
@@ -75,11 +77,6 @@ const styles = StyleSheet.create({
     minHeight: 60,
     justifyContent: 'center',
     alignItems: 'center',
-    // Sombra no iOS
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
     // Sombra no Android
     elevation: 3,
     position: 'relative',
@@ -110,6 +107,19 @@ const styles = StyleSheet.create({
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
     borderTopColor: '#d1d5db',
+  },
+  
+  botaoComecar: {
+    backgroundColor: '#4f46e5',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    marginTop: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
   },
 
 });
