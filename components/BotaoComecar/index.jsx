@@ -14,7 +14,7 @@ export const BotaoComecar = ({title,  onPress}) => {
 const styles = StyleSheet.create({
 
     button: {
-        backgroundColor: '#B872FF',
+        backgroundColor: '#137fec',
         borderRadius: 32,
         padding: 8,
         paddingHorizontal: 80,

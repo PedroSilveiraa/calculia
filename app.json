@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "calculei",
-    "slug": "calculei",
+    "name": "calculia",
+    "slug": "calculia",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/calculia/logo.png",
-    "scheme": "calculei",
+    "icon": "./assets/images/calculia/logo.png",
+    "scheme": "calculia",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
