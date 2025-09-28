@@ -7,6 +7,11 @@ export default function index() {
       <View style={styles.cabecalho} >
         <Text style={styles.saudacao}>Olá, "Criança"!</Text>
         <Text style={styles.subtitulo}>Vamos aprender brincando?</Text>
+
+        <View style={styles.profileCircle}>
+          <Text style={styles.profileText}>Foto</Text>
+        </View>
+
       </View>
     </SafeAreaView>
   );
