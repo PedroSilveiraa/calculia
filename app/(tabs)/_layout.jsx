@@ -1,7 +1,22 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Tabs } from 'expo-router';
+import { Tabs, router, useFocusEffect } from 'expo-router';
+import { useCallback } from 'react';
+import { StorageService } from '../../services/storage';
 
 export default function TabLayout() {
+  useFocusEffect(
+    useCallback(() => {
+      checkUserData();
+    }, [])
+  );
+
+  const checkUserData = async () => {
+    const userData = await StorageService.getUserData();
+    if (!userData) {
+      router.replace('/');
+    }
+  };
+
   return (
     <Tabs screenOptions={{ tabBarActiveTintColor: '#137fec' }}>
       <Tabs.Screen

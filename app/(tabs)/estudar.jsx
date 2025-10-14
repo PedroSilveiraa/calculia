@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 export default function estudar() {
   return (
     <SafeAreaView style={styles.container}>
-      
+
     </SafeAreaView>
   );
 }
@@ -15,6 +15,6 @@ const styles = StyleSheet.create({
     flex: 1,
 
   },
-  
+
 
 });

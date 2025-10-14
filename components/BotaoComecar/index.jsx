@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text } from "react-native";
 export const BotaoComecar = ({title,  onPress}) => {
     return (
         <Pressable style={styles.button} onPress={onPress}>
-           
+
             <Text style={styles.buttonText}>
                 {title}
             </Text>
