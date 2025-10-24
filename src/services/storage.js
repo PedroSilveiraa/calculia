@@ -4,7 +4,8 @@ const STORAGE_KEYS = {
   USER_DATA: '@calculia:userData',
   FIRST_TIME: '@calculia:firstTime',
   LAST_ACCESS: '@calculia:lastAccess',
-  PREVIOUS_ACCESS: '@calculia:previousAccess'
+  PREVIOUS_ACCESS: '@calculia:previousAccess',
+  PROGRESS_STUDIES: '@calculia:progresso_estudos'
 };
 
 export const StorageService = {
@@ -85,6 +86,48 @@ export const StorageService = {
     }
   },
 
+  // Obtém progresso dos estudos
+  async getStudiesProgress() {
+    try {
+      const progress = await AsyncStorage.getItem(STORAGE_KEYS.PROGRESS_STUDIES);
+      return progress ? JSON.parse(progress) : {};
+    } catch (error) {
+      console.error('Erro ao obter progresso de estudos:', error);
+      return {};
+    }
+  },
+
+  // Salva progresso de uma etapa de estudo
+  async saveStudyProgress(etapaId, concluida = true) {
+    try {
+      const currentProgress = await this.getStudiesProgress();
+      const updatedProgress = {
+        ...currentProgress,
+        [etapaId]: {
+          concluida,
+          dataUltimaLeitura: new Date().toISOString()
+        }
+      };
+
+      await AsyncStorage.setItem(STORAGE_KEYS.PROGRESS_STUDIES, JSON.stringify(updatedProgress));
+      return { success: true, progress: updatedProgress };
+    } catch (error) {
+      console.error('Erro ao salvar progresso de estudo:', error);
+      return { success: false, error };
+    }
+  },
+
+  // Limpa todo o progresso de estudos
+  async clearStudiesProgress() {
+    try {
+      await AsyncStorage.removeItem(STORAGE_KEYS.PROGRESS_STUDIES);
+      return { success: true };
+    } catch (error) {
+      console.error('Erro ao limpar progresso de estudos:', error);
+      return { success: false, error };
+    }
+  },
+
   // Limpa todos os dados (útil para testes)
   async clearAll() {
     try {
@@ -92,7 +135,8 @@ export const StorageService = {
         STORAGE_KEYS.USER_DATA,
         STORAGE_KEYS.FIRST_TIME,
         STORAGE_KEYS.LAST_ACCESS,
-        STORAGE_KEYS.PREVIOUS_ACCESS
+        STORAGE_KEYS.PREVIOUS_ACCESS,
+        STORAGE_KEYS.PROGRESS_STUDIES
       ]);
       return { success: true };
     } catch (error) {
@@ -108,15 +152,17 @@ export const StorageService = {
       const previousAccess = await AsyncStorage.getItem(STORAGE_KEYS.PREVIOUS_ACCESS);
       const currentAccess = await AsyncStorage.getItem(STORAGE_KEYS.LAST_ACCESS);
       const isFirst = await this.isFirstTime();
+      const studiesProgress = await this.getStudiesProgress();
 
       console.log('====== DADOS DO ASYNCSTORAGE ======');
       console.log('É primeira vez?', isFirst);
       console.log('Dados do usuário:', userData);
       console.log('Acesso anterior (mostrado na tela):', previousAccess);
       console.log('Acesso atual (este acesso):', currentAccess);
+      console.log('Progresso dos estudos:', studiesProgress);
       console.log('===================================');
 
-      return { userData, lastAccess: previousAccess, isFirst };
+      return { userData, lastAccess: previousAccess, isFirst, studiesProgress };
     } catch (error) {
       console.error('Erro ao fazer debug do storage:', error);
       return null;

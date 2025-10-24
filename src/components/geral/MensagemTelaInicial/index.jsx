@@ -35,13 +35,13 @@ export const MensagemTelaInicial = () => {
         <View style={styles.speechBubbleContainer}>
                 <View style={styles.speechBubble}>
                   <Text style={styles.speechText}>{mensagemAtual}</Text>
-        
+
                   {/* PONTA DO BALÃO (triângulo) */}
                   <View style={styles.speechTail} />
                 </View>
               </View>
     );
-   
+
 }
 
 const styles = StyleSheet.create({

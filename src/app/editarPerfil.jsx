@@ -1,7 +1,7 @@
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useState, useEffect } from 'react';
 import { router } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { StorageService } from '../services/storage';
 
 export default function EditarPerfil() {

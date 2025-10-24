@@ -1,32 +1,26 @@
 import { router, useFocusEffect } from 'expo-router';
 import * as Updates from 'expo-updates';
 import { useCallback, useState } from 'react';
-import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import TelaAutenticacao from '../../components/TelaAutenticacao';
 import { StorageService } from '../../services/storage';
 
 export default function perfil() {
   const [userData, setUserData] = useState(null);
   const [lastAccess, setLastAccess] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [password, setPassword] = useState('');
 
   useFocusEffect(
     useCallback(() => {
       // Reseta a autenticação quando volta para a tela
       setIsAuthenticated(false);
-      setPassword('');
     }, [])
   );
 
-  const checkPassword = () => {
-    if (password === '123') {
-      setIsAuthenticated(true);
-      loadUserData();
-    } else {
-      Alert.alert('Senha Incorreta', 'A senha está incorreta. Tente novamente.');
-      setPassword('');
-    }
+  const handleAuthenticated = () => {
+    setIsAuthenticated(true);
+    loadUserData();
   };
 
   const loadUserData = async () => {
@@ -98,36 +92,12 @@ export default function perfil() {
     );
   };
 
+  const handleDebugDatabase = () => {
+    router.push('/debug/database');
+  };
+
   if (!isAuthenticated) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.content}>
-          <Text style={styles.title}> Acesso Restrito</Text>
-          <Text style={styles.subtitle}>Digite a senha para acessar o perfil</Text>
-
-          <View style={styles.passwordContainer}>
-            <TextInput
-              style={styles.passwordInput}
-              placeholder="Digite a senha"
-              placeholderTextColor="#666"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              keyboardType="numeric"
-              maxLength={3}
-            />
-
-            <TouchableOpacity style={styles.buttonUnlock} onPress={checkPassword}>
-              <Text style={styles.buttonText}>Entrar</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={[styles.buttonUnlock, styles.buttonCancel]} onPress={() => router.back()}>
-              <Text style={styles.buttonText}>Voltar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </SafeAreaView>
-    );
+    return <TelaAutenticacao onAuthenticated={handleAuthenticated} senhaCorreta="123" />;
   }
 
   return (
@@ -169,6 +139,10 @@ export default function perfil() {
 
         <TouchableOpacity style={[styles.button, styles.buttonReload]} onPress={handleReiniciarApp}>
           <Text style={styles.buttonText}>🔄 Reiniciar App</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.button, styles.buttonDebug]} onPress={handleDebugDatabase}>
+          <Text style={styles.buttonText}>🔧 Debug - Banco de Dados</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -224,46 +198,12 @@ const styles = StyleSheet.create({
   buttonReload: {
     backgroundColor: '#F59E0B',
   },
+  buttonDebug: {
+    backgroundColor: '#8B5CF6',
+  },
   buttonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
-  },
-  loadingText: {
-    fontSize: 18,
-    color: '#137fec',
-    fontWeight: 'bold',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 30,
-    textAlign: 'center',
-  },
-  passwordContainer: {
-    width: '100%',
-    maxWidth: 300,
-  },
-  passwordInput: {
-    backgroundColor: '#fff',
-    borderWidth: 2,
-    borderColor: '#137fec',
-    borderRadius: 10,
-    padding: 15,
-    fontSize: 18,
-    color: '#333',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  buttonUnlock: {
-    backgroundColor: '#137fec',
-    padding: 15,
-    borderRadius: 10,
-    width: '100%',
-    marginBottom: 15,
-    alignItems: 'center',
-  },
-  buttonCancel: {
-    backgroundColor: '#94A3B8',
   },
 });

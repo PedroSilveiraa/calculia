@@ -1,8 +1,8 @@
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert, Image, StyleSheet, Text, TextInput, View } from "react-native";
-import { BotaoComecar } from "../components/BotaoComecar";
-import { MensagemTelaInicial } from "../components/MensagemTelaInicial";
+import { Botao } from "../components/geral/Botao";
+import { MensagemTelaInicial } from "../components/geral/MensagemTelaInicial";
 import { StorageService } from "../services/storage";
 
 
@@ -57,6 +57,11 @@ export default function Index() {
   }
 
   return (
+
+    
+
+
+
     <View style={styles.container}>
       <Image source={require('../assets/images/calculia/logo.png')} style={styles.logo} />
 
@@ -84,7 +89,7 @@ export default function Index() {
         </View>
       )}
 
-      <BotaoComecar title="Começar" onPress={handleComecar} />
+      <Botao title="Começar" onPress={handleComecar} />
 
 
     </View>
@@ -111,7 +116,7 @@ const styles = StyleSheet.create({
   input: {
     backgroundColor: '#fff',
     borderWidth: 2,
-    borderColor: '#0EA5E9',
+    borderColor: '#137fec',
     borderRadius: 10,
     padding: 15,
     fontSize: 16,
@@ -119,7 +124,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 18,
-    color: '#0EA5E9',
+    color: '#137fec',
     fontWeight: 'bold',
   },
 });

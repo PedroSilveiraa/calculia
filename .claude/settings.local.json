@@ -2,7 +2,30 @@
   "permissions": {
     "allow": [
       "Bash(mkdir:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(npx expo start:*)",
+      "Bash(npx tsc:*)",
+      "Bash(mv:*)",
+      "Bash(npm install drizzle-orm)",
+      "Bash(npm install -D drizzle-kit)",
+      "Bash(npm install expo-drizzle-studio-plugin)",
+      "Bash(if [ -f \"drizzle.config.mjs\" ])",
+      "Bash(then echo \"Arquivo renomeado com sucesso\")",
+      "Bash(else echo \"Erro ao renomear\")",
+      "Bash(fi)",
+      "Bash(npm run db:studio)",
+      "Bash(npm uninstall expo-drizzle-studio-plugin)",
+      "Read(//c/Users/sjspe/AppData/Local/npm-cache/_logs/**)",
+      "Bash(npx expo --version)",
+      "Bash(npm start)",
+      "Bash(npm uninstall drizzle-orm drizzle-kit)",
+      "Bash(node checkTables.js)",
+      "Bash(npx expo-sqlite-cli calculia.db \"SELECT name FROM sqlite_master WHERE type=''table'' ORDER BY name\")",
+      "Bash(taskkill /F /IM node.exe)",
+      "Bash(pkill -f \"expo start\")",
+      "Bash(pkill -f \"node\")",
+      "Bash(npm start -- --clear --reset-cache)",
+      "Bash(npm start:*)"
     ],
     "deny": [],
     "ask": []

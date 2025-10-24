@@ -18,6 +18,7 @@ export default function TabLayout() {
   };
 
   return (
+
     <Tabs screenOptions={{ tabBarActiveTintColor: '#137fec' }}>
       <Tabs.Screen
         name="index"
@@ -43,7 +44,7 @@ export default function TabLayout() {
           headerShown: false,
         }}
       />
-       <Tabs.Screen
+      <Tabs.Screen
         name="perfil"
         options={{
           title: 'Perfil',
@@ -52,5 +53,6 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
+
   );
 }
