@@ -105,7 +105,7 @@ export default function DatabaseDebug() {
     const resetProgressoFases = () => {
         Alert.alert(
             'Resetar Progresso das Fases',
-            'Isso vai resetar TODO o progresso de TODOS os jogos com fases (Soma e Contagem). Tem certeza?',
+            'Isso vai resetar TODO o progresso de TODOS os jogos com fases (Soma, Contagem e Comparação). Tem certeza?',
             [
                 { text: 'Cancelar', style: 'cancel' },
                 {
@@ -114,11 +114,42 @@ export default function DatabaseDebug() {
                     onPress: async () => {
                         const resultSoma = await ProgressoFasesDatabase.resetarProgresso('soma');
                         const resultContagem = await ProgressoFasesDatabase.resetarProgresso('contagem');
+                        const resultComparacao = await ProgressoFasesDatabase.resetarProgresso('comparacao');
 
-                        if (resultSoma.success && resultContagem.success) {
+                        if (resultSoma.success && resultContagem.success && resultComparacao.success) {
                             Alert.alert('Sucesso', 'Progresso de todos os jogos resetado! Apenas as Fases 1 estão desbloqueadas.');
                         } else {
                             Alert.alert('Erro', 'Houve um erro ao resetar o progresso.');
+                        }
+                    }
+                }
+            ]
+        );
+    };
+
+    const resetCompleteDatabase = () => {
+        Alert.alert(
+            '⚠️ RESETAR TODO O BANCO DE DADOS',
+            'ATENÇÃO! Isso vai DELETAR TUDO:\n\n• Todas as sessões de jogo\n• Todas as respostas\n• Todo o progresso das fases\n• Todas as conquistas desbloqueadas\n\nO banco será recriado do zero. TEM CERTEZA?',
+            [
+                { text: 'Cancelar', style: 'cancel' },
+                {
+                    text: 'DELETAR TUDO',
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            // Deleta todas as tabelas
+                            await db.execAsync('DROP TABLE IF EXISTS sessoes_jogo');
+                            await db.execAsync('DROP TABLE IF EXISTS respostas_jogo');
+                            await db.execAsync('DROP TABLE IF EXISTS progresso_fases');
+                            await db.execAsync('DROP TABLE IF EXISTS conquistas');
+
+                            Alert.alert('Sucesso', 'Banco de dados resetado! Reinicie o aplicativo para recriar as tabelas.');
+                            setSessions([]);
+                            setAnswers([]);
+                            setSelectedSession(null);
+                        } catch (error) {
+                            Alert.alert('Erro', error.message);
                         }
                     }
                 }
@@ -186,6 +217,10 @@ export default function DatabaseDebug() {
                     <TouchableOpacity style={[styles.button, styles.buttonWarning]} onPress={resetProgressoFases}>
                         <Text style={styles.buttonText}>🔄 Resetar Progresso das Fases</Text>
                     </TouchableOpacity>
+
+                    <TouchableOpacity style={[styles.button, styles.buttonDanger]} onPress={resetCompleteDatabase}>
+                        <Text style={styles.buttonText}>💀 RESETAR TODO O BANCO</Text>
+                    </TouchableOpacity>
                 </View>
 
                 {/* Query SQL Customizada */}
@@ -216,17 +251,34 @@ export default function DatabaseDebug() {
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Sessões ({sessions.length})</Text>
 
-                    {sessions.map((session) => (
-                        <View key={session.id} style={styles.sessionCard}>
-                            <View style={styles.sessionHeader}>
-                                <Text style={styles.sessionId}>ID: {session.id}</Text>
-                                <View style={styles.sessionGameType}>
-                                    <Text style={session.tipo_jogo === 'quiz' ? styles.gameTypeQuiz : styles.gameTypeContagem}>
-                                        {session.tipo_jogo === 'quiz' ? '📝 Quiz' : '🔢 Contagem'}
-                                    </Text>
+                    {sessions.map((session) => {
+                        const getGameTypeInfo = (tipo) => {
+                            switch(tipo) {
+                                case 'soma':
+                                    return { label: '➕ Soma', style: styles.gameTypeSoma };
+                                case 'contagem':
+                                    return { label: '🔢 Contagem', style: styles.gameTypeContagem };
+                                case 'comparacao':
+                                    return { label: '⚖️ Comparação', style: styles.gameTypeComparacao };
+                                case 'quiz':
+                                default:
+                                    return { label: '📝 Quiz', style: styles.gameTypeQuiz };
+                            }
+                        };
+
+                        const gameType = getGameTypeInfo(session.tipo_jogo);
+
+                        return (
+                            <View key={session.id} style={styles.sessionCard}>
+                                <View style={styles.sessionHeader}>
+                                    <Text style={styles.sessionId}>ID: {session.id}</Text>
+                                    <View style={styles.sessionGameType}>
+                                        <Text style={gameType.style}>
+                                            {gameType.label}
+                                        </Text>
+                                    </View>
+                                    <Text style={styles.sessionName}>{session.nome_usuario}</Text>
                                 </View>
-                                <Text style={styles.sessionName}>{session.nome_usuario}</Text>
-                            </View>
 
                             <Text style={styles.sessionInfo}>
                                 Início: {formatDate(session.hora_inicio)}
@@ -254,7 +306,8 @@ export default function DatabaseDebug() {
                                 </TouchableOpacity>
                             </View>
                         </View>
-                    ))}
+                        );
+                    })}
 
                     {sessions.length === 0 && (
                         <Text style={styles.emptyText}>Nenhuma sessão encontrada</Text>
@@ -414,8 +467,26 @@ const styles = StyleSheet.create({
     gameTypeContagem: {
         fontSize: 12,
         fontWeight: 'bold',
+        color: '#3B82F6',
+        backgroundColor: '#DBEAFE',
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 8,
+    },
+    gameTypeSoma: {
+        fontSize: 12,
+        fontWeight: 'bold',
         color: '#10B981',
         backgroundColor: '#D1FAE5',
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 8,
+    },
+    gameTypeComparacao: {
+        fontSize: 12,
+        fontWeight: 'bold',
+        color: '#F59E0B',
+        backgroundColor: '#FEF3C7',
         paddingHorizontal: 8,
         paddingVertical: 4,
         borderRadius: 8,

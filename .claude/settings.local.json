@@ -25,7 +25,8 @@
       "Bash(pkill -f \"expo start\")",
       "Bash(pkill -f \"node\")",
       "Bash(npm start -- --clear --reset-cache)",
-      "Bash(npm start:*)"
+      "Bash(npm start:*)",
+      "Bash(npx expo-sqlite delete calculia.db)"
     ],
     "deny": [],
     "ask": []

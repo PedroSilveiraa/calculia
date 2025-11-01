@@ -3,7 +3,7 @@ import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native
 import { useFocusEffect } from 'expo-router';
 import { JogosDatabase } from '../../../services/jogosDatabase';
 
-export const HistoricoPartidas = ({ onGoBack }) => {
+export const HistoricoPartidas = ({ onGoBack, tipoJogo }) => {
     const [history, setHistory] = useState([]);
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -11,13 +11,13 @@ export const HistoricoPartidas = ({ onGoBack }) => {
     useFocusEffect(
         useCallback(() => {
             loadHistory();
-        }, [])
+        }, [tipoJogo])
     );
 
     const loadHistory = async () => {
         setLoading(true);
-        const historyResult = await JogosDatabase.getHistory(20);
-        const statsResult = await JogosDatabase.getStats();
+        const historyResult = await JogosDatabase.getHistory(20, tipoJogo);
+        const statsResult = await JogosDatabase.getStats(tipoJogo);
 
         if (historyResult.success) {
             setHistory(historyResult.sessions);
@@ -47,7 +47,14 @@ export const HistoricoPartidas = ({ onGoBack }) => {
         return (
             <View style={styles.historyItem}>
                 <View style={styles.historyHeader}>
-                    <Text style={styles.historyName}>{item.nome_usuario}</Text>
+                    <View style={styles.historyHeaderRow}>
+                        <Text style={styles.historyName}>{item.nome_usuario}</Text>
+                        {item.numero_fase && (
+                            <View style={styles.faseBadge}>
+                                <Text style={styles.faseText}>Fase {item.numero_fase}</Text>
+                            </View>
+                        )}
+                    </View>
                     <Text style={styles.historyDate}>{formatDate(item.hora_inicio)}</Text>
                 </View>
 
@@ -84,9 +91,18 @@ export const HistoricoPartidas = ({ onGoBack }) => {
         );
     }
 
+    const getTituloJogo = () => {
+        const titulos = {
+            'soma': 'Histórico - Jogo de Soma',
+            'contagem': 'Histórico - Jogo de Contagem',
+            'comparacao': 'Histórico - Jogo de Comparação'
+        };
+        return titulos[tipoJogo] || 'Histórico de Partidas';
+    };
+
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Histórico de Partidas</Text>
+            <Text style={styles.title}>{getTituloJogo()}</Text>
 
             {stats && stats.total_jogos > 0 && (
                 <View style={styles.statsCard}>
@@ -201,10 +217,29 @@ const styles = StyleSheet.create({
     historyHeader: {
         marginBottom: 10,
     },
+    historyHeaderRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: 4,
+    },
     historyName: {
         fontSize: 18,
         fontWeight: 'bold',
         color: '#333',
+        flex: 1,
+    },
+    faseBadge: {
+        backgroundColor: '#0EA5E9',
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 12,
+        marginLeft: 10,
+    },
+    faseText: {
+        color: 'white',
+        fontSize: 12,
+        fontWeight: 'bold',
     },
     historyDate: {
         fontSize: 12,

@@ -6,18 +6,18 @@ import { BotaoResposta } from '../../components/jogos/BotaoResposta';
 import { HistoricoPartidas } from '../../components/jogos/HistoricoPartidas';
 import { ResultadoJogo } from '../../components/jogos/ResultadoJogo';
 import { SeletorFases } from '../../components/jogos/SeletorFases';
-import { TelaJogoSoma } from '../../components/jogos/TelaJogoSoma';
+import { TelaJogoComparacao } from '../../components/jogos/TelaJogoComparacao';
 import { JogosDatabase } from '../../services/jogosDatabase';
 import { ProgressoFasesDatabase } from '../../services/progressoFasesDatabase';
 import { StorageService } from '../../services/storage';
 import { ConquistasDatabase } from '../../services/conquistasDatabase';
-import { FASES_SOMA, TIPO_JOGO_SOMA } from '../../config/fasesSoma';
+import { FASES_COMPARACAO, TIPO_JOGO_COMPARACAO, EMOJIS_COMPARACAO } from '../../config/fasesComparacao';
 
-const FASES = FASES_SOMA;
-const TIPO_JOGO = TIPO_JOGO_SOMA;
+const FASES = FASES_COMPARACAO;
+const TIPO_JOGO = TIPO_JOGO_COMPARACAO;
 
-export default function jogoSoma() {
-  const [gameState, setGameState] = useState('menu'); // menu, selectPhase, playing, result, history
+export default function jogoComparacao() {
+  const [gameState, setGameState] = useState('menu');
   const [faseAtual, setFaseAtual] = useState(null);
   const [fasesDisponiveis, setFasesDisponiveis] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -49,7 +49,6 @@ export default function jogoSoma() {
   const loadProgressoFases = async () => {
     const { fases } = await ProgressoFasesDatabase.getProgressoFases(TIPO_JOGO);
 
-    // Monta array de fases com dados combinados
     const fasesComDados = FASES.map(faseConfig => {
       const progressoFase = fases.find(f => f.numero_fase === faseConfig.numero);
       return {
@@ -69,82 +68,150 @@ export default function jogoSoma() {
   };
 
   const generateQuestionForPhase = (fase) => {
-    const { max, termos } = fase;
-    const numeros = [];
-    let soma = 0;
+    const tiposDisponiveis = fase.tiposPermitidos;
+    const tipoEscolhido = tiposDisponiveis[Math.floor(Math.random() * tiposDisponiveis.length)];
 
-    // Gera números aleatórios baseado na configuração da fase
-    for (let i = 0; i < termos; i++) {
-      let num;
-      if (i === 0) {
-        // Primeiro número: de 1 até (max - número de termos restantes)
-        // Garante que sobra espaço para os outros números (mínimo 1 cada)
-        const maxPrimeiroNumero = max - (termos - 1);
-        num = Math.floor(Math.random() * maxPrimeiroNumero) + 1;
-      } else {
-        // Próximos números devem garantir que a soma não ultrapasse max
-        const restante = max - soma;
-        // Calcula quantos termos ainda faltam após este
-        const termosRestantes = termos - i - 1;
-        // Garante que sobra pelo menos 1 para cada termo restante
-        const maxNumero = restante - termosRestantes;
-
-        if (maxNumero >= 1) {
-          num = Math.floor(Math.random() * maxNumero) + 1;
-        } else {
-          // Se não há espaço suficiente, usa 1
-          num = 1;
-        }
-      }
-      numeros.push(num);
-      soma += num;
+    if (tipoEscolhido === 'numero_maior') {
+      return generateNumeroMaiorQuestion(fase);
+    } else if (tipoEscolhido === 'numero_menor') {
+      return generateNumeroMenorQuestion(fase);
+    } else if (tipoEscolhido === 'objeto_mais') {
+      return generateObjetoMaisQuestion(fase);
+    } else {
+      return generateObjetoMenosQuestion(fase);
     }
+  };
 
-    const question = numeros.join(' + ');
-    const correctAnswer = soma;
+  const generateNumeroMaiorQuestion = (fase) => {
+    const num1 = Math.floor(Math.random() * (fase.maxNumero - fase.minNumero + 1)) + fase.minNumero;
+    let num2;
+    do {
+      num2 = Math.floor(Math.random() * (fase.maxNumero - fase.minNumero + 1)) + fase.minNumero;
+    } while (num2 === num1);
 
-    // Gera 3 respostas erradas
-    const wrongAnswers = [];
-    while (wrongAnswers.length < 3) {
-      const offset = Math.floor(Math.random() * 10) - 5;
-      const wrongAnswer = correctAnswer + (offset === 0 ? (Math.random() > 0.5 ? 1 : -1) : offset);
-
-      if (wrongAnswer !== correctAnswer && !wrongAnswers.includes(wrongAnswer) && wrongAnswer >= 0 && wrongAnswer <= max * 2) {
-        wrongAnswers.push(wrongAnswer);
-      }
-    }
-
-    const allAnswers = [correctAnswer, ...wrongAnswers].sort(() => Math.random() - 0.5);
+    const respostaCorreta = num1 > num2 ? num1 : num2;
+    const respostaErrada = num1 > num2 ? num2 : num1;
 
     return {
-      question,
-      correctAnswer: correctAnswer.toString(),
-      answers: allAnswers.map(a => a.toString())
+      tipo: 'numero_maior',
+      pergunta: 'Qual número é MAIOR?',
+      numero1: num1,
+      numero2: num2,
+      alternativas: [
+        { texto: respostaCorreta.toString(), correta: true, valor: respostaCorreta },
+        { texto: respostaErrada.toString(), correta: false, valor: respostaErrada }
+      ].sort(() => Math.random() - 0.5)
+    };
+  };
+
+  const generateNumeroMenorQuestion = (fase) => {
+    const num1 = Math.floor(Math.random() * (fase.maxNumero - fase.minNumero + 1)) + fase.minNumero;
+    let num2;
+    do {
+      num2 = Math.floor(Math.random() * (fase.maxNumero - fase.minNumero + 1)) + fase.minNumero;
+    } while (num2 === num1);
+
+    const respostaCorreta = num1 < num2 ? num1 : num2;
+    const respostaErrada = num1 < num2 ? num2 : num1;
+
+    return {
+      tipo: 'numero_menor',
+      pergunta: 'Qual número é MENOR?',
+      numero1: num1,
+      numero2: num2,
+      alternativas: [
+        { texto: respostaCorreta.toString(), correta: true, valor: respostaCorreta },
+        { texto: respostaErrada.toString(), correta: false, valor: respostaErrada }
+      ].sort(() => Math.random() - 0.5)
+    };
+  };
+
+  const generateObjetoMaisQuestion = (fase) => {
+    const emoji1 = EMOJIS_COMPARACAO[Math.floor(Math.random() * EMOJIS_COMPARACAO.length)];
+    let emoji2;
+    do {
+      emoji2 = EMOJIS_COMPARACAO[Math.floor(Math.random() * EMOJIS_COMPARACAO.length)];
+    } while (emoji2.emoji === emoji1.emoji);
+
+    const qtd1 = Math.floor(Math.random() * (Math.min(10, fase.maxNumero) - fase.minNumero + 1)) + fase.minNumero;
+    let qtd2;
+    do {
+      qtd2 = Math.floor(Math.random() * (Math.min(10, fase.maxNumero) - fase.minNumero + 1)) + fase.minNumero;
+    } while (qtd2 === qtd1);
+
+    const maisObjetos = qtd1 > qtd2 ? emoji1.nome : emoji2.nome;
+    const menosObjetos = qtd1 > qtd2 ? emoji2.nome : emoji1.nome;
+
+    return {
+      tipo: 'objeto_mais',
+      pergunta: 'Qual tem MAIS objetos?',
+      emoji1: emoji1.emoji,
+      emoji2: emoji2.emoji,
+      nomeObjeto1: emoji1.nome,
+      nomeObjeto2: emoji2.nome,
+      quantidade1: qtd1,
+      quantidade2: qtd2,
+      alternativas: [
+        { texto: maisObjetos, correta: true },
+        { texto: menosObjetos, correta: false }
+      ].sort(() => Math.random() - 0.5)
+    };
+  };
+
+  const generateObjetoMenosQuestion = (fase) => {
+    const emoji1 = EMOJIS_COMPARACAO[Math.floor(Math.random() * EMOJIS_COMPARACAO.length)];
+    let emoji2;
+    do {
+      emoji2 = EMOJIS_COMPARACAO[Math.floor(Math.random() * EMOJIS_COMPARACAO.length)];
+    } while (emoji2.emoji === emoji1.emoji);
+
+    const qtd1 = Math.floor(Math.random() * (Math.min(10, fase.maxNumero) - fase.minNumero + 1)) + fase.minNumero;
+    let qtd2;
+    do {
+      qtd2 = Math.floor(Math.random() * (Math.min(10, fase.maxNumero) - fase.minNumero + 1)) + fase.minNumero;
+    } while (qtd2 === qtd1);
+
+    const menosObjetos = qtd1 < qtd2 ? emoji1.nome : emoji2.nome;
+    const maisObjetos = qtd1 < qtd2 ? emoji2.nome : emoji1.nome;
+
+    return {
+      tipo: 'objeto_menos',
+      pergunta: 'Qual tem MENOS objetos?',
+      emoji1: emoji1.emoji,
+      emoji2: emoji2.emoji,
+      nomeObjeto1: emoji1.nome,
+      nomeObjeto2: emoji2.nome,
+      quantidade1: qtd1,
+      quantidade2: qtd2,
+      alternativas: [
+        { texto: menosObjetos, correta: true },
+        { texto: maisObjetos, correta: false }
+      ].sort(() => Math.random() - 0.5)
     };
   };
 
   const generateQuestions = (fase) => {
     const newQuestions = [];
-    const questionsSet = new Set(); // Para rastrear perguntas já geradas
+    const usedPairs = new Set(); // Track used number pairs
+    const maxAttempts = fase.perguntas * 20; // Safety limit
+    let attempts = 0;
 
-    let tentativas = 0;
-    const maxTentativas = fase.perguntas * 10; // Limite de segurança
-
-    while (newQuestions.length < fase.perguntas && tentativas < maxTentativas) {
+    while (newQuestions.length < fase.perguntas && attempts < maxAttempts) {
       const question = generateQuestionForPhase(fase);
 
-      // Verifica se a pergunta já existe (usando a string da pergunta como chave)
-      if (!questionsSet.has(question.question)) {
-        questionsSet.add(question.question);
+      // For number questions, check if pair was used
+      if (question.tipo === 'numero_maior' || question.tipo === 'numero_menor') {
+        const pairKey = [question.numero1, question.numero2].sort().join('-');
+        if (!usedPairs.has(pairKey)) {
+          usedPairs.add(pairKey);
+          newQuestions.push(question);
+        }
+      } else {
+        // For object questions, always add (different emojis guaranteed by generation)
         newQuestions.push(question);
       }
 
-      tentativas++;
-    }
-
-    // Se não conseguiu gerar perguntas suficientes únicas, completa com perguntas normais
-    while (newQuestions.length < fase.perguntas) {
-      newQuestions.push(generateQuestionForPhase(fase));
+      attempts++;
     }
 
     return newQuestions;
@@ -183,7 +250,7 @@ export default function jogoSoma() {
     if (selectedAnswer !== null || showFeedback) return;
 
     const currentQuestion = questions[currentQuestionIndex];
-    const isCorrect = answer === currentQuestion.correctAnswer;
+    const isCorrect = answer.correta;
     const tempoGastoSegundos = Math.round((Date.now() - questionStartTime) / 1000);
 
     setSelectedAnswer(answer);
@@ -195,9 +262,9 @@ export default function jogoSoma() {
     }
 
     const answerData = {
-      pergunta: currentQuestion.question,
-      resposta_usuario: answer,
-      resposta_correta: currentQuestion.correctAnswer,
+      pergunta: currentQuestion.pergunta,
+      resposta_usuario: answer.texto,
+      resposta_correta: currentQuestion.alternativas.find(alt => alt.correta).texto,
       esta_correto: isCorrect,
       tempo_gasto: tempoGastoSegundos
     };
@@ -222,7 +289,6 @@ export default function jogoSoma() {
     const allAnswers = [...answersHistory, lastAnswer];
     const tempoTotal = Math.round((Date.now() - gameStartTime) / 1000);
 
-    // 1. Salva no histórico de jogos
     const resultJogo = await JogosDatabase.saveCompletedGame(
       TIPO_JOGO,
       userName,
@@ -234,12 +300,11 @@ export default function jogoSoma() {
     );
 
     if (resultJogo.success) {
-      console.log('✅ Jogo de soma salvo com sucesso!');
+      console.log('✅ Jogo de comparação salvo com sucesso!');
     } else {
       console.error('❌ Erro ao salvar jogo:', resultJogo.error);
     }
 
-    // 2. Atualiza progresso da fase
     const resultProgresso = await ProgressoFasesDatabase.saveProgressoFase(
       TIPO_JOGO,
       faseAtual.numero,
@@ -252,7 +317,6 @@ export default function jogoSoma() {
       console.log('🎉 Novo recorde na fase!');
     }
 
-    // 3. Desbloqueia próxima fase
     const resultDesbloqueio = await ProgressoFasesDatabase.desbloquearProximaFase(
       TIPO_JOGO,
       faseAtual.numero
@@ -263,7 +327,6 @@ export default function jogoSoma() {
       console.log(`🔓 Fase ${resultDesbloqueio.numeroFase} desbloqueada!`);
     }
 
-    // 4. Verifica conquistas
     const resultConquistas = await ConquistasDatabase.verificarConquistas(
       TIPO_JOGO,
       faseAtual.numero,
@@ -277,9 +340,7 @@ export default function jogoSoma() {
       console.log(`🏆 ${resultConquistas.conquistasDesbloqueadas.length} conquista(s) desbloqueada(s)!`);
     }
 
-    // 5. Recarrega progresso
     await loadProgressoFases();
-
     setGameState('result');
   };
 
@@ -308,7 +369,6 @@ export default function jogoSoma() {
     }
   };
 
-  // Tela de histórico
   if (gameState === 'history') {
     return (
       <SafeAreaView style={styles.container}>
@@ -317,7 +377,6 @@ export default function jogoSoma() {
     );
   }
 
-  // Tela de resultado
   if (gameState === 'result') {
     return (
       <SafeAreaView style={styles.container}>
@@ -334,7 +393,6 @@ export default function jogoSoma() {
     );
   }
 
-  // Tela de seleção de fases
   if (gameState === 'selectPhase') {
     return (
       <SafeAreaView style={styles.container}>
@@ -347,10 +405,9 @@ export default function jogoSoma() {
     );
   }
 
-  // Tela de jogo
   if (gameState === 'playing') {
     return (
-      <TelaJogoSoma
+      <TelaJogoComparacao
         faseAtual={faseAtual}
         score={score}
         correctAnswers={correctAnswers}
@@ -363,18 +420,17 @@ export default function jogoSoma() {
     );
   }
 
-  // Menu principal
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.menuContainer}>
-        <Text style={styles.title}>➕ Jogo de Soma</Text>
+        <Text style={styles.title}>⚖️ Jogo de Comparação</Text>
 
         <View style={styles.infoCard}>
           <Text style={styles.infoTitle}>Como jogar:</Text>
-          <Text style={styles.infoText}>• 5 fases progressivas de soma</Text>
-          <Text style={styles.infoText}>• Desbloqueie fases completando a anterior</Text>
-          <Text style={styles.infoText}>• Melhore sua pontuação rejogando</Text>
-          <Text style={styles.infoText}>• Apenas somas, números positivos</Text>
+          <Text style={styles.infoText}>• Compare números e descubra qual é maior ou menor</Text>
+          <Text style={styles.infoText}>• Compare quantidades de objetos</Text>
+          <Text style={styles.infoText}>• 5 fases progressivas de dificuldade</Text>
+          <Text style={styles.infoText}>• Desenvolva o raciocínio lógico</Text>
         </View>
 
         <BotaoResposta
@@ -413,7 +469,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#0EA5E9',
+    color: '#F59E0B',
     textAlign: 'center',
     marginBottom: 30,
   },
@@ -423,12 +479,12 @@ const styles = StyleSheet.create({
     padding: 20,
     marginBottom: 30,
     borderWidth: 2,
-    borderColor: '#0EA5E9',
+    borderColor: '#F59E0B',
   },
   infoTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#0EA5E9',
+    color: '#F59E0B',
     marginBottom: 15,
   },
   infoText: {

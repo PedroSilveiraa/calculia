@@ -1,70 +1,23 @@
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BotaoResposta } from '../../components/jogos/BotaoResposta';
-import { BotoesAlternativas } from '../../components/jogos/BotoesAlternativas';
 import { HistoricoPartidas } from '../../components/jogos/HistoricoPartidas';
-import { PainelObjetos } from '../../components/jogos/PainelObjetos';
 import { ResultadoJogo } from '../../components/jogos/ResultadoJogo';
 import { SeletorFases } from '../../components/jogos/SeletorFases';
+import { TelaJogoContagem } from '../../components/jogos/TelaJogoContagem';
 import { JogosDatabase } from '../../services/jogosDatabase';
 import { ProgressoFasesDatabase } from '../../services/progressoFasesDatabase';
 import { StorageService } from '../../services/storage';
+import { ConquistasDatabase } from '../../services/conquistasDatabase';
+import { FASES_CONTAGEM, TIPO_JOGO_CONTAGEM } from '../../config/fasesContagem';
 
 // Emojis disponíveis para os objetos
 const EMOJIS = ['🍎', '🚗', '⭐', '⚽', '🎈', '🌻', '🐱', '🍕', '🎮', '🌈', '🦋', '🌙', '🎨', '🍓', '🐶'];
 
-// Configuração das 5 fases
-const FASES = [
-  {
-    numero: 1,
-    titulo: 'Primeiras Contagens',
-    descricao: 'Conte de 2 a 5 objetos',
-    min: 2,
-    max: 5,
-    perguntas: 5,
-    pontosPorAcerto: 10
-  },
-  {
-    numero: 2,
-    titulo: 'Avançando',
-    descricao: 'Conte de 3 a 7 objetos',
-    min: 3,
-    max: 7,
-    perguntas: 5,
-    pontosPorAcerto: 15
-  },
-  {
-    numero: 3,
-    titulo: 'Ficando Expert',
-    descricao: 'Conte de 5 a 10 objetos',
-    min: 5,
-    max: 10,
-    perguntas: 5,
-    pontosPorAcerto: 20
-  },
-  {
-    numero: 4,
-    titulo: 'Números Maiores',
-    descricao: 'Conte de 8 a 15 objetos',
-    min: 8,
-    max: 15,
-    perguntas: 5,
-    pontosPorAcerto: 25
-  },
-  {
-    numero: 5,
-    titulo: 'Mestre da Contagem',
-    descricao: 'Conte de 10 a 20 objetos',
-    min: 10,
-    max: 20,
-    perguntas: 5,
-    pontosPorAcerto: 30
-  }
-];
-
-const TIPO_JOGO = 'contagem';
+const FASES = FASES_CONTAGEM;
+const TIPO_JOGO = TIPO_JOGO_CONTAGEM;
 
 export default function jogoContagem() {
     const [gameState, setGameState] = useState('menu');
@@ -82,6 +35,7 @@ export default function jogoContagem() {
     const [answersHistory, setAnswersHistory] = useState([]);
     const [questionStartTime, setQuestionStartTime] = useState(null);
     const [proximaFaseDesbloqueada, setProximaFaseDesbloqueada] = useState(false);
+    const [gameStartTime, setGameStartTime] = useState(null);
 
     useFocusEffect(
         useCallback(() => {
@@ -201,6 +155,7 @@ export default function jogoContagem() {
         setContagemAtual(0);
         setRespostaSelecionada(null);
         setQuestionStartTime(Date.now());
+        setGameStartTime(Date.now());
         setProximaFaseDesbloqueada(false);
         setGameState('playing');
     };
@@ -280,6 +235,7 @@ export default function jogoContagem() {
         const finalScore = lastCorrect ? score + faseAtual.pontosPorAcerto : score;
         const finalCorrectAnswers = lastCorrect ? correctAnswers + 1 : correctAnswers;
         const allAnswers = [...answersHistory, lastAnswer];
+        const tempoTotal = Math.round((Date.now() - gameStartTime) / 1000);
 
         // 1. Salva no histórico de jogos
         const resultJogo = await JogosDatabase.saveCompletedGame(
@@ -315,7 +271,21 @@ export default function jogoContagem() {
             setProximaFaseDesbloqueada(true);
         }
 
-        // 4. Recarrega progresso
+        // 4. Verifica conquistas
+        const resultConquistas = await ConquistasDatabase.verificarConquistas(
+            TIPO_JOGO,
+            faseAtual.numero,
+            finalScore,
+            faseAtual.perguntas,
+            finalCorrectAnswers,
+            tempoTotal
+        );
+
+        if (resultConquistas.success && resultConquistas.conquistasDesbloqueadas.length > 0) {
+            console.log(`🏆 ${resultConquistas.conquistasDesbloqueadas.length} conquista(s) desbloqueada(s)!`);
+        }
+
+        // 5. Recarrega progresso
         await loadProgressoFases();
 
         setGameState('result');
@@ -387,74 +357,19 @@ export default function jogoContagem() {
 
     // Tela de jogo
     if (gameState === 'playing') {
-        const currentQuestion = questions[currentQuestionIndex];
-
         return (
-            <SafeAreaView style={styles.container}>
-                <ScrollView contentContainerStyle={styles.scrollContent}>
-                    <View style={styles.header}>
-                        <View style={styles.faseInfo}>
-                            <Text style={styles.faseLabel}>Fase {faseAtual.numero}</Text>
-                            <Text style={styles.faseTitulo}>{faseAtual.titulo}</Text>
-                        </View>
-
-                        <View style={styles.statsRow}>
-                            <View style={styles.scoreContainer}>
-                                <Text style={styles.scoreLabel}>Pontuação</Text>
-                                <Text style={styles.scoreValue}>{score}</Text>
-                            </View>
-
-                            <View style={styles.questionNumberContainer}>
-                                <Text style={styles.questionNumber}>
-                                    {currentQuestionIndex + 1} de {faseAtual.perguntas}
-                                </Text>
-                            </View>
-
-                            <View style={styles.correctContainer}>
-                                <Text style={styles.correctLabel}>Acertos</Text>
-                                <Text style={styles.correctValue}>{correctAnswers}</Text>
-                            </View>
-                        </View>
-                    </View>
-
-                    <View style={styles.instructionContainer}>
-                        <Text style={styles.instructionTitle}>Quantos {currentQuestion.emoji} você vê?</Text>
-                        <Text style={styles.instructionText}>
-                            Toque nos objetos para contá-los!
-                        </Text>
-                        <PainelObjetos
-                            objetos={objetos}
-                            onObjetoPress={handleObjetoPress}
-                        />
-                    </View>
-
-                    <View style={styles.alternativasSection}>
-                        <Text style={styles.alternativasTitle}>Escolha a resposta:</Text>
-                        <BotoesAlternativas
-                            alternativas={currentQuestion.alternativas}
-                            onSelect={handleResposta}
-                            respostaSelecionada={respostaSelecionada}
-                            respostaCorreta={currentQuestion.quantidade}
-                            showFeedback={showFeedback}
-                        />
-                    </View>
-
-                    {showFeedback && (
-                        <View style={styles.feedbackContainer}>
-                            <Text style={[
-                                styles.feedbackText,
-                                respostaSelecionada === currentQuestion.quantidade
-                                    ? styles.feedbackCorrect
-                                    : styles.feedbackWrong
-                            ]}>
-                                {respostaSelecionada === currentQuestion.quantidade
-                                    ? '✓ Correto!'
-                                    : `✗ Errado! A resposta era ${currentQuestion.quantidade}`}
-                            </Text>
-                        </View>
-                    )}
-                </ScrollView>
-            </SafeAreaView>
+            <TelaJogoContagem
+                faseAtual={faseAtual}
+                score={score}
+                correctAnswers={correctAnswers}
+                currentQuestion={questions[currentQuestionIndex]}
+                currentQuestionIndex={currentQuestionIndex}
+                objetos={objetos}
+                onObjetoPress={handleObjetoPress}
+                onResposta={handleResposta}
+                respostaSelecionada={respostaSelecionada}
+                showFeedback={showFeedback}
+            />
         );
     }
 
@@ -501,9 +416,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#E0F2FE',
         flex: 1,
     },
-    scrollContent: {
-        padding: 20,
-    },
     menuContainer: {
         flex: 1,
         padding: 20,
@@ -537,116 +449,5 @@ const styles = StyleSheet.create({
     },
     menuSpacing: {
         height: 10,
-    },
-    header: {
-        padding: 15,
-        backgroundColor: 'white',
-        borderRadius: 16,
-        borderWidth: 2,
-        borderColor: '#10B981',
-        marginBottom: 20,
-    },
-    faseInfo: {
-        alignItems: 'center',
-        marginBottom: 15,
-    },
-    faseLabel: {
-        fontSize: 14,
-        color: '#64748B',
-        fontWeight: '600',
-    },
-    faseTitulo: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: '#10B981',
-    },
-    statsRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        alignItems: 'center',
-    },
-    scoreContainer: {
-        alignItems: 'center',
-    },
-    scoreLabel: {
-        fontSize: 12,
-        color: '#666',
-    },
-    scoreValue: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: '#10B981',
-    },
-    questionNumberContainer: {
-        alignItems: 'center',
-    },
-    questionNumber: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: '#10B981',
-    },
-    correctContainer: {
-        alignItems: 'center',
-    },
-    correctLabel: {
-        fontSize: 12,
-        color: '#666',
-    },
-    correctValue: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: '#10B981',
-    },
-    instructionContainer: {
-        backgroundColor: 'white',
-        borderRadius: 16,
-        padding: 20,
-        marginBottom: 20,
-        borderWidth: 2,
-        borderColor: '#10B981',
-    },
-    instructionTitle: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: '#10B981',
-        textAlign: 'center',
-        marginBottom: 10,
-    },
-    instructionText: {
-        fontSize: 14,
-        color: '#666',
-        textAlign: 'center',
-        marginBottom: 15,
-    },
-    alternativasSection: {
-        backgroundColor: 'white',
-        borderRadius: 16,
-        padding: 20,
-        marginTop: 10,
-        borderWidth: 2,
-        borderColor: '#10B981',
-    },
-    alternativasTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#10B981',
-        textAlign: 'center',
-        marginBottom: 10,
-    },
-    feedbackContainer: {
-        padding: 20,
-        alignItems: 'center',
-        marginTop: 10,
-    },
-    feedbackText: {
-        fontSize: 22,
-        fontWeight: 'bold',
-        textAlign: 'center',
-    },
-    feedbackCorrect: {
-        color: '#10B981',
-    },
-    feedbackWrong: {
-        color: '#EF4444',
     },
 });

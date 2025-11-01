@@ -5,6 +5,9 @@ import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import TelaAutenticacao from '../../components/TelaAutenticacao';
 import { StorageService } from '../../services/storage';
+import { JogosDatabase } from '../../services/jogosDatabase';
+import { ProgressoFasesDatabase } from '../../services/progressoFasesDatabase';
+import { ConquistasDatabase } from '../../services/conquistasDatabase';
 
 export default function perfil() {
   const [userData, setUserData] = useState(null);
@@ -55,20 +58,47 @@ export default function perfil() {
 
   const handleExcluirDados = () => {
     Alert.alert(
-      'Excluir Dados',
-      'Tem certeza que deseja excluir todos os seus dados? O app será reiniciado.',
+      'Excluir TODOS os Dados',
+      'Isso vai apagar:\n• Dados do perfil (AsyncStorage)\n• Histórico de jogos (SQLite)\n• Progresso das fases (SQLite)\n• Conquistas (SQLite)\n\nO app será reiniciado. Tem certeza?',
       [
         { text: 'Cancelar', style: 'cancel' },
         {
-          text: 'Excluir',
+          text: 'Excluir Tudo',
           style: 'destructive',
           onPress: async () => {
-            const result = await StorageService.clearAll();
-            if (result.success) {
-              // Reinicia o app
-              await Updates.reloadAsync();
-            } else {
-              Alert.alert('Erro', 'Não foi possível excluir os dados');
+            try {
+              // Limpa AsyncStorage
+              const resultStorage = await StorageService.clearAll();
+
+              // Limpa histórico de jogos do SQLite
+              const resultJogos = await JogosDatabase.clearHistory();
+
+              // Reseta progresso das fases (todos os jogos)
+              const resultSoma = await ProgressoFasesDatabase.resetarProgresso('soma');
+              const resultContagem = await ProgressoFasesDatabase.resetarProgresso('contagem');
+              const resultComparacao = await ProgressoFasesDatabase.resetarProgresso('comparacao');
+
+              // Reseta conquistas
+              const resultConquistas = await ConquistasDatabase.resetarConquistas();
+
+              // Verifica se todas as operações foram bem-sucedidas
+              if (resultStorage.success && resultJogos.success && resultSoma.success && resultContagem.success && resultComparacao.success && resultConquistas.success) {
+                // Reinicia o app
+                await Updates.reloadAsync();
+              } else {
+                Alert.alert('Erro', 'Não foi possível excluir todos os dados. Verifique o console.');
+                console.error('Erros na exclusão:', {
+                  storage: !resultStorage.success,
+                  jogos: !resultJogos.success,
+                  soma: !resultSoma.success,
+                  contagem: !resultContagem.success,
+                  comparacao: !resultComparacao.success,
+                  conquistas: !resultConquistas.success
+                });
+              }
+            } catch (error) {
+              Alert.alert('Erro', `Erro ao excluir dados: ${error.message}`);
+              console.error('Erro na exclusão completa:', error);
             }
           }
         }
@@ -134,7 +164,7 @@ export default function perfil() {
         </TouchableOpacity>
 
         <TouchableOpacity style={[styles.button, styles.buttonDelete]} onPress={handleExcluirDados}>
-          <Text style={styles.buttonText}>🗑️ Excluir Dados</Text>
+          <Text style={styles.buttonText}>🗑️ Excluir TODOS os Dados</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={[styles.button, styles.buttonReload]} onPress={handleReiniciarApp}>

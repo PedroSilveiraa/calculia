@@ -31,8 +31,8 @@ export default function Index() {
       }
 
       const ageNumber = parseInt(idade);
-      if (isNaN(ageNumber) || ageNumber <= 5 || ageNumber > 10) {
-        Alert.alert('Atenção', 'Por favor, digite uma idade válida entre 6 e 10 anos');
+      if (isNaN(ageNumber) || ageNumber <= 3 || ageNumber > 12) {
+        Alert.alert('Atenção', 'Por favor, digite uma idade válida entre 4 e 12 anos');
         return;
       }
 
