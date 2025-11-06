@@ -1,4 +1,5 @@
 // Configuração das 5 fases do jogo de comparação
+// Total de pontos possíveis: 500 pontos (5 perguntas por fase)
 export const FASES_COMPARACAO = [
   {
     numero: 1,
@@ -8,7 +9,7 @@ export const FASES_COMPARACAO = [
     maxNumero: 5,
     tiposPermitidos: ['numero_maior', 'numero_menor'],
     perguntas: 5,
-    pontosPorAcerto: 10
+    pontosPorAcerto: 10  // 50 pontos
   },
   {
     numero: 2,
@@ -17,8 +18,8 @@ export const FASES_COMPARACAO = [
     minNumero: 1,
     maxNumero: 10,
     tiposPermitidos: ['numero_maior', 'numero_menor'],
-    perguntas: 6,
-    pontosPorAcerto: 15
+    perguntas: 5,
+    pontosPorAcerto: 15  // 75 pontos
   },
   {
     numero: 3,
@@ -27,8 +28,8 @@ export const FASES_COMPARACAO = [
     minNumero: 1,
     maxNumero: 10,
     tiposPermitidos: ['numero_maior', 'numero_menor', 'objeto_mais', 'objeto_menos'],
-    perguntas: 8,
-    pontosPorAcerto: 20
+    perguntas: 5,
+    pontosPorAcerto: 20  // 100 pontos
   },
   {
     numero: 4,
@@ -37,8 +38,8 @@ export const FASES_COMPARACAO = [
     minNumero: 5,
     maxNumero: 15,
     tiposPermitidos: ['numero_maior', 'numero_menor', 'objeto_mais', 'objeto_menos'],
-    perguntas: 8,
-    pontosPorAcerto: 25
+    perguntas: 5,
+    pontosPorAcerto: 25  // 125 pontos
   },
   {
     numero: 5,
@@ -47,8 +48,8 @@ export const FASES_COMPARACAO = [
     minNumero: 5,
     maxNumero: 20,
     tiposPermitidos: ['objeto_mais', 'objeto_menos'],
-    perguntas: 10,
-    pontosPorAcerto: 30
+    perguntas: 5,
+    pontosPorAcerto: 30  // 150 pontos
   }
 ];
 

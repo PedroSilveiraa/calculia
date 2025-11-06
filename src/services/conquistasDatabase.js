@@ -82,9 +82,12 @@ export class ConquistasDatabase {
       }
 
       // Desbloqueia a conquista
+      const now = new Date();
+      const localDate = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString();
+
       await db.runAsync(
         'UPDATE conquistas SET desbloqueada = 1, data_desbloqueio = ?, visualizada = 0 WHERE id = ?',
-        [new Date().toISOString(), conquistaId]
+        [localDate, conquistaId]
       );
 
       const conquistaAtualizada = await db.getFirstAsync(
@@ -271,6 +274,40 @@ export class ConquistasDatabase {
         );
         if (fasesContagem.count === 5) {
           const result = await this.desbloquearConquista('mestre_contagem');
+          if (result.success && !result.jaDesbloqueada) {
+            conquistasDesbloqueadas.push(result.conquista);
+          }
+        }
+      }
+
+      // Conquistas específicas do jogo de comparação
+      if (tipoJogo === 'comparacao') {
+        if (numeroFase === 1) {
+          const result = await this.desbloquearConquista('comparacao_fase1');
+          if (result.success && !result.jaDesbloqueada) {
+            conquistasDesbloqueadas.push(result.conquista);
+          }
+        }
+        if (numeroFase === 3) {
+          const result = await this.desbloquearConquista('comparacao_fase3');
+          if (result.success && !result.jaDesbloqueada) {
+            conquistasDesbloqueadas.push(result.conquista);
+          }
+        }
+        if (numeroFase === 5) {
+          const result = await this.desbloquearConquista('comparacao_fase5');
+          if (result.success && !result.jaDesbloqueada) {
+            conquistasDesbloqueadas.push(result.conquista);
+          }
+        }
+
+        // Mestre da Comparação (todas as 5 fases completas)
+        const fasesComparacao = await db.getFirstAsync(
+          'SELECT COUNT(*) as count FROM progresso_fases WHERE tipo_jogo = ? AND concluida = 1',
+          ['comparacao']
+        );
+        if (fasesComparacao.count === 5) {
+          const result = await this.desbloquearConquista('mestre_comparacao');
           if (result.success && !result.jaDesbloqueada) {
             conquistasDesbloqueadas.push(result.conquista);
           }

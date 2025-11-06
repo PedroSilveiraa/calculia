@@ -1,6 +1,6 @@
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Alert, Image, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { Botao } from "../components/geral/Botao";
 import { MensagemTelaInicial } from "../components/geral/MensagemTelaInicial";
 import { StorageService } from "../services/storage";
@@ -57,42 +57,48 @@ export default function Index() {
   }
 
   return (
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+    >
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <Image source={require('../assets/images/calculia/logo.png')} style={styles.logo} />
 
-    
+        <MensagemTelaInicial />
 
+        <Image source={require('../assets/images/calculia/avatar-robo.png')} style={styles.logo} />
 
+        {isFirstTime && (
+          <View style={styles.formContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="Digite seu nome"
+              placeholderTextColor="#666"
+              value={nome}
+              onChangeText={setNome}
+              autoCapitalize="words"
+              autoCorrect={false}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Digite sua idade"
+              placeholderTextColor="#666"
+              value={idade}
+              onChangeText={setIdade}
+              keyboardType="numeric"
+              returnKeyType="done"
+            />
+          </View>
+        )}
 
-    <View style={styles.container}>
-      <Image source={require('../assets/images/calculia/logo.png')} style={styles.logo} />
-
-      <MensagemTelaInicial />
-
-      <Image source={require('../assets/images/calculia/avatar-robo.png')} style={styles.logo} />
-
-      {isFirstTime && (
-        <View style={styles.formContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Digite seu nome"
-            placeholderTextColor="#666"
-            value={nome}
-            onChangeText={setNome}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Digite sua idade"
-            placeholderTextColor="#666"
-            value={idade}
-            onChangeText={setIdade}
-            keyboardType="numeric"
-          />
-        </View>
-      )}
-
-      <Botao title="Começar" onPress={handleComecar} />
-
-
-    </View>
+        <Botao title="Começar" onPress={handleComecar} />
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -101,8 +107,12 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: '#E0F2FE',
     flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
     alignItems: "center",
     justifyContent: "center",
+    paddingVertical: 20,
   },
   logo: {
     width: 200,

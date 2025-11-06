@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BotaoResposta } from '../BotaoResposta';
 import { CardPergunta } from '../CardPergunta';
@@ -12,10 +12,15 @@ export function TelaJogoSoma({
   onAnswer,
   showFeedback,
   selectedAnswer,
+  onExit,
 }) {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
+        <TouchableOpacity style={styles.exitButton} onPress={onExit}>
+          <Text style={styles.exitButtonText}>Sair</Text>
+        </TouchableOpacity>
+
         <View style={styles.faseInfo}>
           <Text style={styles.faseLabel}>Fase {faseAtual.numero}</Text>
           <Text style={styles.faseTitulo}>{faseAtual.titulo}</Text>
@@ -47,27 +52,12 @@ export function TelaJogoSoma({
             text={answer}
             onPress={() => onAnswer(answer)}
             disabled={showFeedback}
-            isCorrect={showFeedback && answer === currentQuestion.correctAnswer}
-            isWrong={showFeedback && answer !== currentQuestion.correctAnswer}
+            isCorrect={false}
+            isWrong={false}
             isSelected={answer === selectedAnswer}
           />
         ))}
       </View>
-
-      {showFeedback && (
-        <View style={styles.feedbackContainer}>
-          <Text
-            style={[
-              styles.feedbackText,
-              selectedAnswer === currentQuestion.correctAnswer
-                ? styles.feedbackCorrect
-                : styles.feedbackWrong,
-            ]}
-          >
-            {selectedAnswer === currentQuestion.correctAnswer ? '✓ Correto!' : '✗ Errado!'}
-          </Text>
-        </View>
-      )}
     </SafeAreaView>
   );
 }
@@ -124,6 +114,18 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#10B981',
+  },
+  exitButton: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    zIndex: 10,
+    padding: 8,
+  },
+  exitButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#EF4444',
   },
   answersContainer: {
     padding: 20,

@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BotoesAlternativas } from '../BotoesAlternativas';
 import { PainelObjetos } from '../PainelObjetos';
@@ -14,11 +14,16 @@ export function TelaJogoContagem({
   onResposta,
   respostaSelecionada,
   showFeedback,
+  onExit,
 }) {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
+          <TouchableOpacity style={styles.exitButton} onPress={onExit}>
+            <Text style={styles.exitButtonText}>Sair</Text>
+          </TouchableOpacity>
+
           <View style={styles.faseInfo}>
             <Text style={styles.faseLabel}>Fase {faseAtual.numero}</Text>
             <Text style={styles.faseTitulo}>{faseAtual.titulo}</Text>
@@ -57,27 +62,10 @@ export function TelaJogoContagem({
             alternativas={currentQuestion.alternativas}
             onSelect={onResposta}
             respostaSelecionada={respostaSelecionada}
-            respostaCorreta={currentQuestion.quantidade}
-            showFeedback={showFeedback}
+            respostaCorreta={null}
+            showFeedback={false}
           />
         </View>
-
-        {showFeedback && (
-          <View style={styles.feedbackContainer}>
-            <Text
-              style={[
-                styles.feedbackText,
-                respostaSelecionada === currentQuestion.quantidade
-                  ? styles.feedbackCorrect
-                  : styles.feedbackWrong,
-              ]}
-            >
-              {respostaSelecionada === currentQuestion.quantidade
-                ? '✓ Correto!'
-                : `✗ Errado! A resposta era ${currentQuestion.quantidade}`}
-            </Text>
-          </View>
-        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -151,6 +139,18 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: '#10B981',
+  },
+  exitButton: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    zIndex: 10,
+    padding: 8,
+  },
+  exitButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#EF4444',
   },
   instructionContainer: {
     padding: 20,

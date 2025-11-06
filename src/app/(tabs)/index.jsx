@@ -1,17 +1,18 @@
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BarraProgresso } from '../../components/geral/BarraProgresso';
+import { ModalAjuda } from '../../components/geral/ModalAjuda';
+import { ModalConquista } from '../../components/geral/ModalConquista';
+import { ConquistasDatabase } from '../../services/conquistasDatabase';
 import { ProgressoFasesDatabase } from '../../services/progressoFasesDatabase';
 import { StorageService } from '../../services/storage';
-import { ConquistasDatabase } from '../../services/conquistasDatabase';
-import { ModalConquista } from '../../components/geral/ModalConquista';
 
 // Pontuação máxima possível nos jogos
 const PONTUACAO_MAXIMA_SOMA = 500; // 50 + 75 + 100 + 125 + 150
 const PONTUACAO_MAXIMA_CONTAGEM = 500; // 50 + 75 + 100 + 125 + 150
-const PONTUACAO_MAXIMA_COMPARACAO = 600; // 50 + 90 + 140 + 200 + 300
+const PONTUACAO_MAXIMA_COMPARACAO = 500; // 50 + 75 + 100 + 125 + 150
 
 export default function index() {
 
@@ -39,6 +40,7 @@ export default function index() {
   const [modalConquistaVisible, setModalConquistaVisible] = useState(false);
   const [conquistaAtual, setConquistaAtual] = useState(null);
   const [conquistasNaoVisualizadas, setConquistasNaoVisualizadas] = useState([]);
+  const [modalAjudaVisible, setModalAjudaVisible] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -124,8 +126,16 @@ export default function index() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Botão de Ajuda */}
+      <TouchableOpacity
+        style={styles.botaoAjuda}
+        onPress={() => setModalAjudaVisible(true)}
+      >
+        <Text style={styles.botaoAjudaTexto}>?</Text>
+      </TouchableOpacity>
+
       <ScrollView>
-        <Text style={styles.titulo}>Página Inicial</Text>
+        <Text style={styles.titulo}>Página Principal</Text>
 
         <View style={styles.cabecalho}>
           <Text style={styles.saudacao}>Olá, {nome}</Text>
@@ -133,21 +143,7 @@ export default function index() {
         </View>
 
         <View style={styles.progressoContainer}>
-          <View style={styles.progressoCard}>
-            <Text style={styles.progressoTitulo}>➕ Jogo de Soma</Text>
 
-            <BarraProgresso
-              progresso={progressoSoma.porcentagem}
-              titulo="Progresso Total"
-              mostrarTextoDetalhes={`${progressoSoma.pontuacaoTotal} de ${PONTUACAO_MAXIMA_SOMA} pontos • ${progressoSoma.fasesCompletas}/${progressoSoma.totalFases} fases`}
-            />
-
-            {progressoSoma.porcentagem === 100 && (
-              <View style={styles.completoCard}>
-                <Text style={styles.completoTexto}>🏆 Todas as fases completas!</Text>
-              </View>
-            )}
-          </View>
 
           <View style={styles.progressoCard}>
             <Text style={styles.progressoTitulo}>🔢 Jogo de Contagem</Text>
@@ -159,6 +155,22 @@ export default function index() {
             />
 
             {progressoContagem.porcentagem === 100 && (
+              <View style={styles.completoCard}>
+                <Text style={styles.completoTexto}>🏆 Todas as fases completas!</Text>
+              </View>
+            )}
+          </View>
+
+          <View style={styles.progressoCard}>
+            <Text style={styles.progressoTitulo}>➕ Jogo de Soma</Text>
+
+            <BarraProgresso
+              progresso={progressoSoma.porcentagem}
+              titulo="Progresso Total"
+              mostrarTextoDetalhes={`${progressoSoma.pontuacaoTotal} de ${PONTUACAO_MAXIMA_SOMA} pontos • ${progressoSoma.fasesCompletas}/${progressoSoma.totalFases} fases`}
+            />
+
+            {progressoSoma.porcentagem === 100 && (
               <View style={styles.completoCard}>
                 <Text style={styles.completoTexto}>🏆 Todas as fases completas!</Text>
               </View>
@@ -228,6 +240,11 @@ export default function index() {
         visible={modalConquistaVisible}
         onClose={handleCloseModal}
       />
+
+      <ModalAjuda
+        visible={modalAjudaVisible}
+        onClose={() => setModalAjudaVisible(false)}
+      />
     </SafeAreaView>
   );
 }
@@ -242,6 +259,29 @@ const styles = StyleSheet.create({
     backgroundColor: '#E0F2FE',
     flex: 1,
     padding: 16,
+  },
+  botaoAjuda: {
+    position: 'absolute',
+    margin: 20,
+    top: 16,
+    right: 16,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#0EA5E9',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 999,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  botaoAjudaTexto: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
   },
   cabecalho: {
     marginBottom: 20,

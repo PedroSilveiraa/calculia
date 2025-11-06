@@ -1,7 +1,19 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useEffect } from 'react';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useSound } from '../../../hooks/useSound';
 
 export const ResultadoJogo = ({ score, totalQuestions, correctAnswers, onPlayAgain, onViewHistory, onGoBack, proximaFaseDesbloqueada = false }) => {
+    const { playGanhou, playPerdeu } = useSound();
     const percentage = Math.round((correctAnswers / totalQuestions) * 100);
+
+    useEffect(() => {
+        // Toca som ao exibir resultado
+        if (correctAnswers === 0) {
+            playPerdeu(); // Errou todas as questões
+        } else {
+            playGanhou(); // Acertou pelo menos uma questão
+        }
+    }, []);
 
     const getMessage = () => {
         if (percentage >= 90) return "Excelente!";
@@ -18,7 +30,7 @@ export const ResultadoJogo = ({ score, totalQuestions, correctAnswers, onPlayAga
     };
 
     return (
-        <View style={styles.container}>
+        <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
             {proximaFaseDesbloqueada && (
                 <View style={styles.desbloqueioCard}>
                     <Text style={styles.desbloqueioEmoji}>🎉</Text>
@@ -61,15 +73,18 @@ export const ResultadoJogo = ({ score, totalQuestions, correctAnswers, onPlayAga
             <TouchableOpacity style={[styles.button, styles.buttonTertiary]} onPress={onGoBack}>
                 <Text style={styles.buttonText}>Voltar</Text>
             </TouchableOpacity>
-        </View>
+        </ScrollView>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+    },
+    contentContainer: {
         padding: 20,
         justifyContent: 'center',
+        flexGrow: 1,
     },
     resultCard: {
         backgroundColor: 'white',

@@ -55,6 +55,9 @@ export class ProgressoFasesDatabase {
       const novosAcertos = isNovoRecorde ? acertos : faseAtual.acertos;
 
       // Atualiza o progresso
+      const now = new Date();
+      const localDate = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString();
+
       await db.runAsync(
         `UPDATE progresso_fases
          SET melhor_pontuacao = ?,
@@ -63,7 +66,7 @@ export class ProgressoFasesDatabase {
              concluida = 1,
              data_conclusao = ?
          WHERE tipo_jogo = ? AND numero_fase = ?`,
-        [novaPontuacao, totalPerguntas, novosAcertos, new Date().toISOString(), tipoJogo, numeroFase]
+        [novaPontuacao, totalPerguntas, novosAcertos, localDate, tipoJogo, numeroFase]
       );
 
       console.log(`✅ Progresso da fase ${numeroFase} atualizado!`, { isNovoRecorde, pontuacao: novaPontuacao });

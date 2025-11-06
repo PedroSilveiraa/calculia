@@ -42,7 +42,7 @@ export const HistoricoPartidas = ({ onGoBack, tipoJogo }) => {
     };
 
     const renderItem = ({ item }) => {
-        const percentage = Math.round((item.respostas_corretas / item.total_perguntas) * 100);
+        const percentage = Math.min(100, Math.round((item.respostas_corretas / item.total_perguntas) * 100));
 
         return (
             <View style={styles.historyItem}>
@@ -127,7 +127,7 @@ export const HistoricoPartidas = ({ onGoBack, tipoJogo }) => {
                         <View style={styles.statItem}>
                             <Text style={styles.statLabel}>Taxa de Acerto</Text>
                             <Text style={styles.statValue}>
-                                {Math.round((stats.total_corretas / stats.total_perguntas) * 100)}%
+                                {Math.min(100, Math.round((stats.total_corretas / stats.total_perguntas) * 100))}%
                             </Text>
                         </View>
                     </View>

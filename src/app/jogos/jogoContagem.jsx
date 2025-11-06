@@ -1,17 +1,19 @@
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useState } from 'react';
-import { Alert, StyleSheet, Text, View } from "react-native";
+import { useCallback, useState, useEffect } from 'react';
+import { Alert, BackHandler, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BotaoResposta } from '../../components/jogos/BotaoResposta';
 import { HistoricoPartidas } from '../../components/jogos/HistoricoPartidas';
 import { ResultadoJogo } from '../../components/jogos/ResultadoJogo';
 import { SeletorFases } from '../../components/jogos/SeletorFases';
 import { TelaJogoContagem } from '../../components/jogos/TelaJogoContagem';
+import { ModalFeedback } from '../../components/geral/ModalFeedback';
 import { JogosDatabase } from '../../services/jogosDatabase';
 import { ProgressoFasesDatabase } from '../../services/progressoFasesDatabase';
 import { StorageService } from '../../services/storage';
 import { ConquistasDatabase } from '../../services/conquistasDatabase';
 import { FASES_CONTAGEM, TIPO_JOGO_CONTAGEM } from '../../config/fasesContagem';
+import { useSound } from '../../hooks/useSound';
 
 // Emojis disponíveis para os objetos
 const EMOJIS = ['🍎', '🚗', '⭐', '⚽', '🎈', '🌻', '🐱', '🍕', '🎮', '🌈', '🦋', '🌙', '🎨', '🍓', '🐶'];
@@ -20,6 +22,7 @@ const FASES = FASES_CONTAGEM;
 const TIPO_JOGO = TIPO_JOGO_CONTAGEM;
 
 export default function jogoContagem() {
+    const { playJogar } = useSound();
     const [gameState, setGameState] = useState('menu');
     const [faseAtual, setFaseAtual] = useState(null);
     const [fasesDisponiveis, setFasesDisponiveis] = useState([]);
@@ -43,6 +46,19 @@ export default function jogoContagem() {
             loadProgressoFases();
         }, [])
     );
+
+    // Handler para botão voltar do Android/iOS
+    useEffect(() => {
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+            if (gameState === 'playing') {
+                handleExitGame();
+                return true;
+            }
+            return false;
+        });
+
+        return () => backHandler.remove();
+    }, [gameState]);
 
     const loadUserName = async () => {
         const userData = await StorageService.getUserData();
@@ -139,6 +155,7 @@ export default function jogoContagem() {
             return;
         }
 
+        playJogar(); // Toca som ao selecionar fase
         setFaseAtual(fase);
         startGame(fase);
     };
@@ -215,26 +232,29 @@ export default function jogoContagem() {
         };
 
         setAnswersHistory(prev => [...prev, answerData]);
-
-        setTimeout(() => {
-            if (currentQuestionIndex < faseAtual.perguntas - 1) {
-                const nextIndex = currentQuestionIndex + 1;
-                setCurrentQuestionIndex(nextIndex);
-                setObjetos(questions[nextIndex].objetos);
-                setContagemAtual(0);
-                setRespostaSelecionada(null);
-                setShowFeedback(false);
-                setQuestionStartTime(Date.now());
-            } else {
-                finishGame(isCorrect, answerData);
-            }
-        }, 1500);
     };
 
-    const finishGame = async (lastCorrect, lastAnswer) => {
-        const finalScore = lastCorrect ? score + faseAtual.pontosPorAcerto : score;
-        const finalCorrectAnswers = lastCorrect ? correctAnswers + 1 : correctAnswers;
-        const allAnswers = [...answersHistory, lastAnswer];
+    const handleNextQuestionContagem = () => {
+        if (currentQuestionIndex < faseAtual.perguntas - 1) {
+            const nextIndex = currentQuestionIndex + 1;
+            setCurrentQuestionIndex(nextIndex);
+            setObjetos(questions[nextIndex].objetos);
+            setContagemAtual(0);
+            setRespostaSelecionada(null);
+            setShowFeedback(false);
+            setQuestionStartTime(Date.now());
+        } else {
+            finishGame();
+        }
+    };
+
+    const finishGame = async () => {
+        // score e correctAnswers já foram atualizados no handleResposta
+        // Garante que não ultrapassa os limites
+        const maxScore = faseAtual.perguntas * faseAtual.pontosPorAcerto;
+        const finalScore = Math.min(score, maxScore);
+        const finalCorrectAnswers = Math.min(correctAnswers, faseAtual.perguntas);
+        const allAnswers = answersHistory.slice(0, faseAtual.perguntas); // Garante apenas 5 respostas
         const tempoTotal = Math.round((Date.now() - gameStartTime) / 1000);
 
         // 1. Salva no histórico de jogos
@@ -316,6 +336,23 @@ export default function jogoContagem() {
         }
     };
 
+    const handleExitGame = () => {
+        Alert.alert(
+            'Sair do Jogo?',
+            'Você perderá todo o progresso desta partida. Tem certeza?',
+            [
+                { text: 'Continuar Jogando', style: 'cancel' },
+                {
+                    text: 'Sair',
+                    style: 'destructive',
+                    onPress: () => {
+                        setGameState('selectPhase');
+                    }
+                }
+            ]
+        );
+    };
+
     // Tela de histórico
     if (gameState === 'history') {
         return (
@@ -358,18 +395,26 @@ export default function jogoContagem() {
     // Tela de jogo
     if (gameState === 'playing') {
         return (
-            <TelaJogoContagem
-                faseAtual={faseAtual}
-                score={score}
-                correctAnswers={correctAnswers}
-                currentQuestion={questions[currentQuestionIndex]}
-                currentQuestionIndex={currentQuestionIndex}
-                objetos={objetos}
-                onObjetoPress={handleObjetoPress}
-                onResposta={handleResposta}
-                respostaSelecionada={respostaSelecionada}
-                showFeedback={showFeedback}
-            />
+            <>
+                <TelaJogoContagem
+                    faseAtual={faseAtual}
+                    score={score}
+                    correctAnswers={correctAnswers}
+                    currentQuestion={questions[currentQuestionIndex]}
+                    currentQuestionIndex={currentQuestionIndex}
+                    objetos={objetos}
+                    onObjetoPress={handleObjetoPress}
+                    onResposta={handleResposta}
+                    respostaSelecionada={respostaSelecionada}
+                    showFeedback={showFeedback}
+                    onExit={handleExitGame}
+                />
+                <ModalFeedback
+                    visible={showFeedback}
+                    isCorrect={respostaSelecionada === questions[currentQuestionIndex]?.quantidade}
+                    onNext={handleNextQuestionContagem}
+                />
+            </>
         );
     }
 

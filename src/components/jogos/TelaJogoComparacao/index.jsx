@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BotaoResposta } from '../BotaoResposta';
 
@@ -11,6 +11,7 @@ export function TelaJogoComparacao({
   onAnswer,
   showFeedback,
   selectedAnswer,
+  onExit,
 }) {
   const renderQuestao = () => {
     if (currentQuestion.tipo === 'numero_maior' || currentQuestion.tipo === 'numero_menor') {
@@ -67,6 +68,10 @@ export function TelaJogoComparacao({
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
+          <TouchableOpacity style={styles.exitButton} onPress={onExit}>
+            <Text style={styles.exitButtonText}>Sair</Text>
+          </TouchableOpacity>
+
           <View style={styles.faseInfo}>
             <Text style={styles.faseLabel}>Fase {faseAtual.numero}</Text>
             <Text style={styles.faseTitulo}>{faseAtual.titulo}</Text>
@@ -104,25 +109,12 @@ export function TelaJogoComparacao({
               text={alternativa.texto}
               onPress={() => onAnswer(alternativa)}
               disabled={showFeedback}
-              isCorrect={showFeedback && alternativa.correta}
-              isWrong={showFeedback && selectedAnswer?.texto === alternativa.texto && !alternativa.correta}
+              isCorrect={false}
+              isWrong={false}
               isSelected={selectedAnswer?.texto === alternativa.texto}
             />
           ))}
         </View>
-
-        {showFeedback && (
-          <View style={styles.feedbackContainer}>
-            <Text
-              style={[
-                styles.feedbackText,
-                selectedAnswer?.correta ? styles.feedbackCorrect : styles.feedbackWrong,
-              ]}
-            >
-              {selectedAnswer?.correta ? '✓ Correto!' : '✗ Errado!'}
-            </Text>
-          </View>
-        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -196,6 +188,18 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: '#10B981',
+  },
+  exitButton: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    zIndex: 10,
+    padding: 8,
+  },
+  exitButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#EF4444',
   },
   perguntaContainer: {
     padding: 20,

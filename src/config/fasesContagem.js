@@ -44,16 +44,7 @@ export const FASES_CONTAGEM = [
     max: 20,
     perguntas: 5,
     pontosPorAcerto: 30
-  },
-   {
-    numero: 6,
-    titulo: 'Teste Final',
-    descricao: 'teste',
-    min: 15,
-    max: 30,
-    perguntas: 5,
-    pontosPorAcerto: 40
-  },
+  }
 ];
 
 export const TIPO_JOGO_CONTAGEM = 'contagem';

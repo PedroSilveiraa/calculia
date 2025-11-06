@@ -13,12 +13,14 @@ export class JogosDatabase {
    */
   static async saveCompletedGame(tipoJogo, userName, totalScore, totalQuestions, correctAnswers, answers, numeroFase = 1) {
     try {
-      const now = new Date().toISOString();
+      // Cria data/hora no horário local
+      const now = new Date();
+      const localDate = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString();
 
       // 1. Cria a sessão
       const sessionResult = await db.runAsync(
         'INSERT INTO sessoes_jogo (tipo_jogo, nome_usuario, hora_inicio, hora_fim, pontuacao_total, total_perguntas, respostas_corretas, numero_fase) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        [tipoJogo, userName, now, now, totalScore, totalQuestions, correctAnswers, numeroFase]
+        [tipoJogo, userName, localDate, localDate, totalScore, totalQuestions, correctAnswers, numeroFase]
       );
 
       const sessionId = sessionResult.lastInsertRowId;

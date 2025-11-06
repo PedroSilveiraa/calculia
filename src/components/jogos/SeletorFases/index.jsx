@@ -7,9 +7,9 @@ export function SeletorFases({ fases, onSelecionarFase, onVoltar }) {
     const porcentagem = (acertos / totalPerguntas) * 100;
     let numEstrelas = 0;
 
-    if (porcentagem >= 90) numEstrelas = 3;
-    else if (porcentagem >= 70) numEstrelas = 2;
-    else if (porcentagem >= 50) numEstrelas = 1;
+    if (porcentagem === 100) numEstrelas = 3; // 3 estrelas apenas com 100%
+    else if (porcentagem >= 60) numEstrelas = 2;
+    else if (porcentagem >= 20) numEstrelas = 1;
 
     return (
       <View style={styles.estrelas}>

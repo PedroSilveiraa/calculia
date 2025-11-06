@@ -3,6 +3,15 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const jogosDisponiveis = [
+
+   {
+    id: 'contagem',
+    titulo: 'Jogo de Contagem',
+    emoji: '🔢',
+    descricao: 'Conte objetos e desenvolva suas habilidades numéricas',
+    cor: '#3B82F6',
+    rota: '/jogos/jogoContagem',
+  },
   {
     id: 'soma',
     titulo: 'Jogo de Soma',
@@ -10,14 +19,6 @@ const jogosDisponiveis = [
     descricao: 'Pratique adições e melhore sua velocidade de cálculo',
     cor: '#10B981',
     rota: '/jogos/jogoSoma',
-  },
-  {
-    id: 'contagem',
-    titulo: 'Jogo de Contagem',
-    emoji: '🔢',
-    descricao: 'Conte objetos e desenvolva suas habilidades numéricas',
-    cor: '#3B82F6',
-    rota: '/jogos/jogoContagem',
   },
   {
     id: 'comparacao',

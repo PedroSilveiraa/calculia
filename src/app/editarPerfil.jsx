@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StorageService } from '../services/storage';
 
@@ -53,38 +53,51 @@ export default function EditarPerfil() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.title}>Editar Perfil</Text>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <Text style={styles.title}>Editar Perfil</Text>
 
-        <View style={styles.formContainer}>
-          <Text style={styles.label}>Nome</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Digite seu nome"
-            placeholderTextColor="#666"
-            value={nome}
-            onChangeText={setNome}
-          />
+          <View style={styles.formContainer}>
+            <Text style={styles.label}>Nome</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Digite seu nome"
+              placeholderTextColor="#666"
+              value={nome}
+              onChangeText={setNome}
+              autoCapitalize="words"
+              autoCorrect={false}
+            />
 
-          <Text style={styles.label}>Idade</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Digite sua idade"
-            placeholderTextColor="#666"
-            value={idade}
-            onChangeText={setIdade}
-            keyboardType="numeric"
-          />
-        </View>
+            <Text style={styles.label}>Idade</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Digite sua idade"
+              placeholderTextColor="#666"
+              value={idade}
+              onChangeText={setIdade}
+              keyboardType="numeric"
+              returnKeyType="done"
+            />
+          </View>
 
-        <TouchableOpacity style={styles.button} onPress={handleSalvar}>
-          <Text style={styles.buttonText}>💾 Salvar Alterações</Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={handleSalvar}>
+            <Text style={styles.buttonText}>💾 Salvar Alterações</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity style={[styles.button, styles.buttonCancel]} onPress={() => router.back()}>
-          <Text style={styles.buttonText}>❌ Cancelar</Text>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity style={[styles.button, styles.buttonCancel]} onPress={() => router.back()}>
+            <Text style={styles.buttonText}>❌ Cancelar</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -94,8 +107,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#E0F2FE',
     flex: 1,
   },
-  content: {
+  flex: {
     flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
     padding: 20,
     justifyContent: 'center',
   },

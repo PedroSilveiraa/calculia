@@ -1,12 +1,17 @@
 import { StyleSheet, Text, View, Modal, TouchableOpacity, Animated } from 'react-native';
 import { useEffect, useRef } from 'react';
+import { useSound } from '../../../hooks/useSound';
 
 export const ModalConquista = ({ conquista, visible, onClose }) => {
+  const { playConquista } = useSound();
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const rotateAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (visible) {
+      // Toca som de conquista
+      playConquista();
+
       // Animação de entrada
       Animated.parallel([
         Animated.spring(scaleAnim, {

@@ -1,22 +1,25 @@
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useState } from 'react';
-import { Alert, StyleSheet, Text, View } from "react-native";
+import { useCallback, useState, useEffect } from 'react';
+import { Alert, BackHandler, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BotaoResposta } from '../../components/jogos/BotaoResposta';
 import { HistoricoPartidas } from '../../components/jogos/HistoricoPartidas';
 import { ResultadoJogo } from '../../components/jogos/ResultadoJogo';
 import { SeletorFases } from '../../components/jogos/SeletorFases';
 import { TelaJogoSoma } from '../../components/jogos/TelaJogoSoma';
+import { ModalFeedback } from '../../components/geral/ModalFeedback';
 import { JogosDatabase } from '../../services/jogosDatabase';
 import { ProgressoFasesDatabase } from '../../services/progressoFasesDatabase';
 import { StorageService } from '../../services/storage';
 import { ConquistasDatabase } from '../../services/conquistasDatabase';
 import { FASES_SOMA, TIPO_JOGO_SOMA } from '../../config/fasesSoma';
+import { useSound } from '../../hooks/useSound';
 
 const FASES = FASES_SOMA;
 const TIPO_JOGO = TIPO_JOGO_SOMA;
 
 export default function jogoSoma() {
+  const { playJogar } = useSound();
   const [gameState, setGameState] = useState('menu'); // menu, selectPhase, playing, result, history
   const [faseAtual, setFaseAtual] = useState(null);
   const [fasesDisponiveis, setFasesDisponiveis] = useState([]);
@@ -38,6 +41,19 @@ export default function jogoSoma() {
       loadProgressoFases();
     }, [])
   );
+
+  // Handler para botão voltar do Android/iOS
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (gameState === 'playing') {
+        handleExitGame();
+        return true; // Previne comportamento padrão
+      }
+      return false; // Permite comportamento padrão
+    });
+
+    return () => backHandler.remove();
+  }, [gameState]);
 
   const loadUserName = async () => {
     const userData = await StorageService.getUserData();
@@ -160,6 +176,7 @@ export default function jogoSoma() {
       return;
     }
 
+    playJogar(); // Toca som ao selecionar fase
     setFaseAtual(fase);
     startGame(fase);
   };
@@ -203,23 +220,26 @@ export default function jogoSoma() {
     };
 
     setAnswersHistory(prev => [...prev, answerData]);
-
-    setTimeout(() => {
-      if (currentQuestionIndex < faseAtual.perguntas - 1) {
-        setCurrentQuestionIndex(currentQuestionIndex + 1);
-        setSelectedAnswer(null);
-        setShowFeedback(false);
-        setQuestionStartTime(Date.now());
-      } else {
-        finishGame(isCorrect, answerData);
-      }
-    }, 1500);
   };
 
-  const finishGame = async (lastCorrect, lastAnswer) => {
-    const finalScore = lastCorrect ? score + faseAtual.pontosPorAcerto : score;
-    const finalCorrectAnswers = lastCorrect ? correctAnswers + 1 : correctAnswers;
-    const allAnswers = [...answersHistory, lastAnswer];
+  const handleNextQuestion = () => {
+    if (currentQuestionIndex < faseAtual.perguntas - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+      setSelectedAnswer(null);
+      setShowFeedback(false);
+      setQuestionStartTime(Date.now());
+    } else {
+      finishGame();
+    }
+  };
+
+  const finishGame = async () => {
+    // score e correctAnswers já foram atualizados no handleAnswer
+    // Garante que não ultrapassa os limites
+    const maxScore = faseAtual.perguntas * faseAtual.pontosPorAcerto;
+    const finalScore = Math.min(score, maxScore);
+    const finalCorrectAnswers = Math.min(correctAnswers, faseAtual.perguntas);
+    const allAnswers = answersHistory.slice(0, faseAtual.perguntas); // Garante apenas 5 respostas
     const tempoTotal = Math.round((Date.now() - gameStartTime) / 1000);
 
     // 1. Salva no histórico de jogos
@@ -308,6 +328,23 @@ export default function jogoSoma() {
     }
   };
 
+  const handleExitGame = () => {
+    Alert.alert(
+      'Sair do Jogo?',
+      'Você perderá todo o progresso desta partida. Tem certeza?',
+      [
+        { text: 'Continuar Jogando', style: 'cancel' },
+        {
+          text: 'Sair',
+          style: 'destructive',
+          onPress: () => {
+            setGameState('selectPhase');
+          }
+        }
+      ]
+    );
+  };
+
   // Tela de histórico
   if (gameState === 'history') {
     return (
@@ -350,16 +387,24 @@ export default function jogoSoma() {
   // Tela de jogo
   if (gameState === 'playing') {
     return (
-      <TelaJogoSoma
-        faseAtual={faseAtual}
-        score={score}
-        correctAnswers={correctAnswers}
-        currentQuestion={questions[currentQuestionIndex]}
-        currentQuestionIndex={currentQuestionIndex}
-        onAnswer={handleAnswer}
-        showFeedback={showFeedback}
-        selectedAnswer={selectedAnswer}
-      />
+      <>
+        <TelaJogoSoma
+          faseAtual={faseAtual}
+          score={score}
+          correctAnswers={correctAnswers}
+          currentQuestion={questions[currentQuestionIndex]}
+          currentQuestionIndex={currentQuestionIndex}
+          onAnswer={handleAnswer}
+          showFeedback={showFeedback}
+          selectedAnswer={selectedAnswer}
+          onExit={handleExitGame}
+        />
+        <ModalFeedback
+          visible={showFeedback}
+          isCorrect={selectedAnswer === questions[currentQuestionIndex]?.correctAnswer}
+          onNext={handleNextQuestion}
+        />
+      </>
     );
   }
 
