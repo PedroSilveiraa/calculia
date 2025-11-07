@@ -225,11 +225,18 @@ Use o padrão `KeyboardAvoidingView` + `ScrollView` para formulários:
 O banco de dados é inicializado em `src/app/_layout.jsx` antes do app renderizar. Isso garante que todas as tabelas e dados iniciais existam antes de qualquer tela carregar.
 
 ### Timestamps Locais
-Todos os timestamps usam horário local com correção de fuso horário:
+Todos os timestamps são salvos no formato local (sem sufixo Z) para evitar problemas de conversão de timezone:
 ```javascript
 const now = new Date();
-const localDate = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString();
+const year = now.getFullYear();
+const month = String(now.getMonth() + 1).padStart(2, '0');
+const day = String(now.getDate()).padStart(2, '0');
+const hours = String(now.getHours()).padStart(2, '0');
+const minutes = String(now.getMinutes()).padStart(2, '0');
+const seconds = String(now.getSeconds()).padStart(2, '0');
+const localDate = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
 ```
+Isso garante que as datas sejam exibidas corretamente sem conversões indesejadas de timezone.
 
 ### Storage vs Banco de Dados
 - **AsyncStorage** (`StorageService`): Dados de perfil do usuário, flag de primeira vez, último acesso

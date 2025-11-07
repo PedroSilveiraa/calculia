@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Alert, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StorageService } from '../../services/storage';
+import { ConquistasDatabase } from '../../services/conquistasDatabase';
 import { ETAPAS_ESTUDO } from '../../config/etapasEstudo';
 
 export default function Estudar() {
@@ -56,11 +57,23 @@ export default function Estudar() {
   const marcarConcluida = async () => {
     await salvarProgresso(etapaSelecionada.id);
 
-    Alert.alert(
-      '🎉 Parabéns!',
-      'Etapa concluída com sucesso! Continue aprendendo!',
-      [{ text: 'OK' }]
-    );
+    // Verifica se desbloqueou a conquista "Estudioso"
+    const progressoAtualizado = await StorageService.getStudiesProgress();
+    const resultConquista = await ConquistasDatabase.verificarConquistaEstudioso(progressoAtualizado);
+
+    if (resultConquista.conquistaDesbloqueada) {
+      Alert.alert(
+        '🎉 Conquista Desbloqueada!',
+        `Você desbloqueou: ${resultConquista.conquistaDesbloqueada.titulo} - ${resultConquista.conquistaDesbloqueada.descricao}`,
+        [{ text: 'OK' }]
+      );
+    } else {
+      Alert.alert(
+        '🎉 Parabéns!',
+        'Etapa concluída com sucesso! Continue aprendendo!',
+        [{ text: 'OK' }]
+      );
+    }
 
     setModalVisivel(false);
   };

@@ -1,5 +1,5 @@
-import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useEffect } from 'react';
+import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSound } from '../../../hooks/useSound';
 
 const MENSAGENS_ACERTO = [
@@ -59,7 +59,7 @@ export function ModalFeedback({ visible, isCorrect, onNext }) {
         ]}>
           <View style={styles.iconContainer}>
             <Text style={styles.icon}>
-              {isCorrect ? '✅' : '❌'}
+              {isCorrect ? '✅' : '💡'}
             </Text>
           </View>
 
@@ -75,7 +75,7 @@ export function ModalFeedback({ visible, isCorrect, onNext }) {
             onPress={onNext}
           >
             <Text style={styles.buttonText}>
-              Próxima Pergunta →
+               {isCorrect ? 'Próxima Pergunta!' : 'Tente Novamente!'}
             </Text>
           </TouchableOpacity>
         </View>

@@ -81,9 +81,15 @@ export class ConquistasDatabase {
         return { success: true, jaDesbloqueada: true, conquista };
       }
 
-      // Desbloqueia a conquista
+      // Desbloqueia a conquista com data/hora local do dispositivo
       const now = new Date();
-      const localDate = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      const localDate = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
 
       await db.runAsync(
         'UPDATE conquistas SET desbloqueada = 1, data_desbloqueio = ?, visualizada = 0 WHERE id = ?',
@@ -204,14 +210,6 @@ export class ConquistasDatabase {
         }
       }
 
-      // Velocista (menos de 30 segundos)
-      if (tempoTotal && tempoTotal < 30) {
-        const result = await this.desbloquearConquista('rapido');
-        if (result.success && !result.jaDesbloqueada) {
-          conquistasDesbloqueadas.push(result.conquista);
-        }
-      }
-
       // Conquistas específicas do jogo de soma
       if (tipoJogo === 'soma') {
         if (numeroFase === 1) {
@@ -318,6 +316,34 @@ export class ConquistasDatabase {
     } catch (error) {
       console.error('Erro ao verificar conquistas:', error);
       return { success: false, error: error.message, conquistasDesbloqueadas };
+    }
+  }
+
+  /**
+   * Verifica conquista "Estudioso" baseada no progresso de estudos
+   * @param {Object} progressoEstudos - Objeto com progresso das etapas de estudo
+   * @returns {Object} - { success, conquistaDesbloqueada }
+   */
+  static async verificarConquistaEstudioso(progressoEstudos) {
+    try {
+      // Conta quantas etapas foram concluídas
+      const etapasConcluidas = Object.values(progressoEstudos).filter(
+        etapa => etapa.concluida === true
+      ).length;
+
+      // Estudioso: Complete 5 etapas de estudo
+      if (etapasConcluidas >= 5) {
+        const result = await this.desbloquearConquista('estudioso');
+        if (result.success && !result.jaDesbloqueada) {
+          console.log('🎉 Conquista "Estudioso" desbloqueada!');
+          return { success: true, conquistaDesbloqueada: result.conquista };
+        }
+      }
+
+      return { success: true, conquistaDesbloqueada: null };
+    } catch (error) {
+      console.error('Erro ao verificar conquista Estudioso:', error);
+      return { success: false, error: error.message, conquistaDesbloqueada: null };
     }
   }
 
