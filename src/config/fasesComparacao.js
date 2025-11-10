@@ -2,14 +2,14 @@
 // Total de pontos possíveis: 500 pontos (5 perguntas por fase)
 export const FASES_COMPARACAO = [
   {
-    numero: 1,
-    titulo: 'Primeiros Números',
-    descricao: 'Compare números de 1 a 5',
-    minNumero: 1,
-    maxNumero: 5,
-    tiposPermitidos: ['numero_maior', 'numero_menor'],
-    perguntas: 5,
-    pontosPorAcerto: 10  // 50 pontos
+    numero: 1, //id da fase
+    titulo: 'Primeiros Números', //título da fase
+    descricao: 'Compare números de 1 a 5', //descrição da fase
+    minNumero: 1, //número mínimo usado nas perguntas
+    maxNumero: 5, //número máximo usado nas perguntas
+    tiposPermitidos: ['numero_maior', 'numero_menor'], //tipos de comparação permitidos
+    perguntas: 5, //número de perguntas
+    pontosPorAcerto: 10  // total: 50 pontos
   },
   {
     numero: 2,

@@ -1,13 +1,13 @@
 // Configuração das 5 fases do jogo de soma
 export const FASES_SOMA = [
   {
-    numero: 1,
-    titulo: 'Primeiros Passos',
-    descricao: 'Soma até 5',
-    max: 5,
-    termos: 2,
-    perguntas: 5,
-    pontosPorAcerto: 10
+    numero: 1,  //id da fase
+    titulo: 'Primeiros Passos', //título da fase
+    descricao: 'Soma até 5', //descrição da fase
+    max: 5,   //número máximo usado nas perguntas
+    termos: 2,  //número de termos a serem somados
+    perguntas: 5, //número de perguntas
+    pontosPorAcerto: 10 // total: 50 pontos
   },
   {
     numero: 2,

@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Alert, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { StorageService } from '../../services/storage';
-import { ConquistasDatabase } from '../../services/conquistasDatabase';
 import { ETAPAS_ESTUDO } from '../../config/etapasEstudo';
+import { ConquistasDatabase } from '../../services/conquistasDatabase';
+import { StorageService } from '../../services/storage';
 
 export default function Estudar() {
   const [progressoEtapas, setProgressoEtapas] = useState({});
@@ -89,7 +89,7 @@ export default function Estudar() {
         <View style={styles.headerContent}>
           <View style={styles.headerTextos}>
             <Text style={styles.titulo}>📚 Área de Estudos</Text>
-            <Text style={styles.subtitulo}>Atividades lúdicas para pré-escola</Text>
+            <Text style={styles.subtitulo}>Atividades lúdicas</Text>
           </View>
         </View>
       </View>

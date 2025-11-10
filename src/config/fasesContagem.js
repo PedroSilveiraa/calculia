@@ -1,13 +1,13 @@
 // Configuração das 5 fases do jogo de contagem
 export const FASES_CONTAGEM = [
   {
-    numero: 1,
-    titulo: 'Primeiras Contagens',
-    descricao: 'Conte de 2 a 5 objetos',
-    min: 2,
-    max: 5,
-    perguntas: 5,
-    pontosPorAcerto: 10
+    numero: 1, //id da fase
+    titulo: 'Primeiras Contagens', //título da fase
+    descricao: 'Conte de 2 a 5 objetos', //descrição da fase
+    min: 2,  //número mínimo usado nas perguntas
+    max: 5,   //número máximo usado nas perguntas
+    perguntas: 5, //número de perguntas
+    pontosPorAcerto: 10 // total: 50 pontos
   },
   {
     numero: 2,

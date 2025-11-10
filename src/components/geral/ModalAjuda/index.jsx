@@ -102,8 +102,8 @@ export function ModalAjuda({ visible, onClose }) {
             <View style={styles.secao}>
               <Text style={styles.secaoTitulo}>👤 Perfil da Criança</Text>
               <Text style={styles.texto}>
-                Na aba Perfil você pode visualizar informações detalhadas, ver todas
-                as conquistas desbloqueadas e acessar o histórico completo de jogos.
+                Na aba Perfil você pode visualizar informações detalhadas, como ver todas
+                as conquistas desbloqueadas.
               </Text>
             </View>
 

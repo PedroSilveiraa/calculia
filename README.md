@@ -1,50 +1,102 @@
-# Welcome to your Expo app 👋
+# Calculia
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+**Calculia** é um aplicativo educacional móvel desenvolvido em React Native com Expo SDK 54, focado no ensino de matemática para crianças através de jogos interativos e divertidos.
 
-## Get started
 
-1. Install dependencies
+## Como Rodar o Projeto
 
-   ```bash
-   npm install
-   ```
+### Passo 1: Clonar o Repositório
 
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
+Abra o CMD e entre no caminho que quer salvar o projeto.
+Clone o projeto do GitHub:
 ```bash
-npm run reset-project
+git clone https://github.com/PedroSilveiraa/calculia.git
+cd calculia
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+**Não tem o Git instalado?** Baixe em: [git-scm.com/install]
+(https://git-scm.com/install)
 
-## Learn more
+**Alternativa:** Você também pode baixar o projeto como ZIP diretamente do [repositório](https://github.com/PedroSilveiraa/calculia) clicando em **Code → Download ZIP**.
 
-To learn more about developing your project with Expo, look at the following resources:
+### Passo 2: Instalar o Node.js
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Este projeto requer a versão **22.18.0** do Node.js.
 
-## Join the community
+**Download:** [nodejs.org/download/release/v22.18.0](https://nodejs.org/download/release/v22.18.0)
 
-Join our community of developers creating universal apps.
+Após a instalação, verifique se a versão está correta:
+```bash
+node -v
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+### Passo 3: Instalar Dependências
+
+No terminal, dentro da pasta do projeto, execute:
+```bash
+npm install
+```
+
+Aguarde enquanto todas as dependências são instaladas.
+
+### Passo 4: Configurar o Android Studio
+
+#### 4.1 Instalar o Android Studio
+
+ **Download:** [developer.android.com/studio](https://developer.android.com/studio)
+
+#### 4.2 Criar um Dispositivo Virtual
+
+1. Abra o Android Studio
+2. Clique em **More Actions → Virtual Device Manager**
+3. Clique no botão **+** (Create Device)
+4. Selecione **Medium Phone** (recomendado para este projeto)
+5. Siga o assistente para concluir a criação
+6. No Device Manager, clique em **▶ Start** para iniciar o emulador
+
+
+###  Passo 5: Iniciar o Projeto
+
+Com o emulador Android em execução, rode um dos comandos abaixo:
+
+#### Modo padrão
+```bash
+npx expo start
+```
+Após carregar, pressione **A** no teclado para abrir no emulador Android.
+
+#### Modo com cache limpo (recomendado em caso de erros)
+```bash
+npx expo start --clear
+```
+
+#### Modo tunnel (para testar no celular físico)
+```bash
+npx expo start --tunnel
+```
+
+**Para celular físico:**
+1. Instale o app **Expo Go** Android (Play Store) / IOS (Apple Store)
+2. Escaneie o QR Code que aparece no terminal
+3. O app abrirá automaticamente no Expo Go
+
+## Outro modo de iniciar o projeto:
+**Visual Studio Code**
+Fazer os mesmos passos do CMD, no terminal do VSCODE, aonde fica mais facil de visualizar o projeto todo.
+
+## Problemas Comuns
+
+### Erro de módulos ou cache
+```bash
+npx expo start --clear
+```
+
+### Emulador não abre
+- Verifique se o emulador está em execução no Android Studio
+- Certifique-se de que a virtualização está habilitada na BIOS
+
+### Erro de versão do Node
+```bash
+node -v
+# Deve retornar v22.18.0
+```

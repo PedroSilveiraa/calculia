@@ -14,7 +14,7 @@ const MENSAGENS_ACERTO = [
 ];
 
 const MENSAGENS_ERRO = [
-  "Quase lá! 🌈 Tenta de novo!",
+  "Quase lá! 👏 Tenta de novo!",
   "Você tá aprendendo! 💡",
   "Não tem problema errar, é assim que a gente cresce! 🌱",
   "Boa tentativa! 🙌 Vamos tentar mais uma vez?",
@@ -22,7 +22,6 @@ const MENSAGENS_ERRO = [
   "Você tá indo muito bem, continua tentando! 🧩",
   "Errar faz parte do jogo! 💪",
   "Não desiste! Cada erro te deixa mais esperto! 🦉",
-  "Ops! Vamos juntos descobrir a certa? 🔍",
   "Você consegue! 🌟 Só mais uma tentativa!"
 ];
 
@@ -75,7 +74,7 @@ export function ModalFeedback({ visible, isCorrect, onNext }) {
             onPress={onNext}
           >
             <Text style={styles.buttonText}>
-               {isCorrect ? 'Próxima Pergunta!' : 'Tente Novamente!'}
+               {isCorrect ? 'Próxima Pergunta!' : 'Continue Tentando!'}
             </Text>
           </TouchableOpacity>
         </View>
