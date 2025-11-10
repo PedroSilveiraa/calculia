@@ -84,6 +84,8 @@ npx expo start --tunnel
 **Visual Studio Code**
 Fazer os mesmos passos do CMD, no terminal do VSCODE, aonde fica mais facil de visualizar o projeto todo.
 
+
+
 ## Problemas Comuns
 
 ### Erro de módulos ou cache
@@ -100,3 +102,4 @@ npx expo start --clear
 node -v
 # Deve retornar v22.18.0
 ```
+## SENHA ABA PERFIL: 123
