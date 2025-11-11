@@ -5,6 +5,9 @@
 
 ## Como Rodar o Projeto
 
+### Foi gerado um apk, se quiser baixar diretamente de um celular Android:
+Baixe em: (https://drive.google.com/drive/folders/1EdIu9GtK9_8n5lJV4E6eqg6Z0CX2BHKQ?usp=sharing)
+
 ### Passo 1: Clonar o Repositório
 
 Abra o CMD e entre no caminho que quer salvar o projeto.
